@@ -2,24 +2,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
+using Newtonsoft.Json;
+using System.IO;
+
+[System.Serializable]
+public class Point
+{
+    public float x;
+    public float y;
+    public float z;
+
+    public Point(Vector3 pos)
+    {
+        x = pos.x;
+        y = pos.y;
+        z = pos.z;
+    }
+
+}
 
 public class PointCloudLogger : MonoBehaviour
 {
-
-    public class Point
-    {
-        public float x;
-        public float y;
-        public float z;
-
-        public Point(Vector3 pos)
-        {
-            x = pos.x;
-            y = pos.y;
-            z = pos.z;
-        }
-
-    }
+    public CubeBehaviour cube;
+    
 
     public ARPointCloudManager pointManager;
 
@@ -30,6 +35,7 @@ public class PointCloudLogger : MonoBehaviour
     public void StartScan()
     {
         scan = true;
+        cube.gameObject.transform.position = new Vector3(1, 1, 1);
     }
 
     void Start()
@@ -41,53 +47,33 @@ public class PointCloudLogger : MonoBehaviour
     {
         yield return new WaitForSeconds(2);
         pointManager.pointCloudsChanged += PointCloudsChanged;
-        Debug.Log("bind");
     }
 
     public void PointCloudsChanged(ARPointCloudChangedEventArgs obj)
     {
-        // foreach (var pointsList in obj.added)
-        // {
-        //     foreach (var point in pointsList.positions)
-        //     {
-        //         Debug.Log("added");
-        //         points.Add(new Point(point));
-        //     }
-        // }
-
-
 
         foreach (var pointsList in obj.updated)
         {
             foreach (var point in pointsList.positions)
             {
-                // if (scan)
-                // {
-                Debug.Log("added");
                 points.Add(new Point(point));
-                if (points.Count < 10000)
-                {
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    cube.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-                    cube.transform.position = point;
-                    scan = false;
-                }
-                // }
             }
         }
 
-        // foreach (var pointsList in obj.removed)
-        // {
-        //     foreach (var point in pointsList.positions)
-        //     {
-        //         points.Remove(point);
-        //     }
-        // }
+    }
+
+    public void ReportLog()
+    {
+        Debug.Log(Application.persistentDataPath);
+        File.WriteAllText(Application.persistentDataPath + "/pointsLog.txt", JsonConvert.SerializeObject(points));
+        new NativeShare().AddFile(Application.persistentDataPath + "/pointsLog.txt")
+        .SetSubject("Subject goes here").SetText("Hello world!").SetCallback((result, shareTarget) => Debug.Log("Share result: " + result + ", selected app: " + shareTarget))
+        .Share();
     }
 
     // Update is called once per frame
     void Update()
     {
-        // Debug.Log("Points: " + points.Count);
+        cube.CheckCollision(points);
     }
 }

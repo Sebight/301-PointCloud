@@ -146,6 +146,7 @@ Library: lib_burst_generated
 --root-assembly=D:\Programovani\Unity\301-PointCloud\PointCloud\Temp\StagingArea\Data\Managed\Unity.Burst.dll
 --root-assembly=D:\Programovani\Unity\301-PointCloud\PointCloud\Temp\StagingArea\Data\Managed\Unity.TextMeshPro.dll
 --root-assembly=D:\Programovani\Unity\301-PointCloud\PointCloud\Temp\StagingArea\Data\Managed\Unity.Timeline.dll
+--root-assembly=D:\Programovani\Unity\301-PointCloud\PointCloud\Temp\StagingArea\Data\Managed\NativeShare.Runtime.dll
 --root-assembly=D:\Programovani\Unity\301-PointCloud\PointCloud\Temp\StagingArea\Data\Managed\Unity.RenderPipeline.Universal.ShaderLibrary.dll
 --root-assembly=D:\Programovani\Unity\301-PointCloud\PointCloud\Temp\StagingArea\Data\Managed\Assembly-CSharp.dll
 --root-assembly=D:\Programovani\Unity\301-PointCloud\PointCloud\Temp\StagingArea\Data\Managed\IngameDebugConsole.Runtime.dll
