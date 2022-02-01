@@ -74,6 +74,6 @@ public class PointCloudLogger : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        cube.CheckCollision(points);
+        // cube.CheckCollision(points);
     }
 }

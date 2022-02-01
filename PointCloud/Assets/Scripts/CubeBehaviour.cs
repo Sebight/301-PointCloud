@@ -8,19 +8,20 @@ public class CubeBehaviour : MonoBehaviour
 
     public BoxCollider collider;
 
-    public void CheckCollision(List<Point> points)
+    public void CheckCollision(List<PointWrap> points)
     {
         for (int i = 0; i < points.Count; ++i)
         {
-            Point p = points[i];
+            Point p = points[i].acualPoint;
             Vector3 colliderPos = collider.ClosestPoint(new Vector3(p.x, p.y, p.z));
             float distance = Vector3.Distance(colliderPos, new Vector3(p.x, p.y, p.z));
-            Debug.Log(distance);
-            if (distance < 2)
+            if (distance < 0.1)
             {
+                points[i].go.GetComponent<MeshRenderer>().material.color = Color.green;
                 gameObject.GetComponent<MeshRenderer>().material.color = Color.red;
             } else
             {
+                points[i].go.GetComponent<MeshRenderer>().material.color = Color.gray;
                 gameObject.GetComponent<MeshRenderer>().material.color = Color.white;
             }
         }
