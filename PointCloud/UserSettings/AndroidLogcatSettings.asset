@@ -1,9 +1,9 @@
 {
     "m_SelectedDeviceId": "ce051715ccec391e017e",
     "m_SelectedPackage": {
-        "deviceId": "",
-        "name": "",
-        "processId": 0,
+        "deviceId": "ce051715ccec391e017e",
+        "name": "com.DefaultCompany.PointCloud",
+        "processId": 2270,
         "exited": false
     },
     "m_SelectedPriority": 0,
@@ -43,6 +43,18 @@
             "name": "com.DefaultCompany.PointCloud",
             "processId": 18452,
             "exited": true
+        },
+        {
+            "deviceId": "ce051715ccec391e017e",
+            "name": "com.DefaultCompany.PointCloud",
+            "processId": 30844,
+            "exited": false
+        },
+        {
+            "deviceId": "ce051715ccec391e017e",
+            "name": "com.DefaultCompany.PointCloud",
+            "processId": 2270,
+            "exited": false
         }
     ],
     "m_Tags": {

@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 using Newtonsoft.Json;
 using System.IO;
 
@@ -13,12 +12,9 @@ public class PointWrap
 
 public class PointsSpawner : MonoBehaviour
 {
-
     public List<Point> points = new List<Point>();
 
     public List<PointWrap> spawned = new List<PointWrap>();
-
-
 
 
     public CubeBehaviour cube;
@@ -47,6 +43,8 @@ public class PointsSpawner : MonoBehaviour
         for (int i = 0; i < points.Count; i++)
         {
             while (!spawn) yield return null;
+            // if (points[i].confidence > 0.2f)
+            // {
             GameObject point = GameObject.CreatePrimitive(PrimitiveType.Cube);
             point.transform.position = new Vector3(points[i].x, points[i].y, points[i].z);
             point.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
@@ -56,6 +54,7 @@ public class PointsSpawner : MonoBehaviour
             wrap.acualPoint = points[i];
             spawned.Add(wrap);
             yield return new WaitForSeconds(0.0001f);
+            // }
         }
     }
 

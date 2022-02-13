@@ -12,19 +12,21 @@ public class Point
     public float y;
     public float z;
 
-    public Point(Vector3 pos)
+    public float confidence;
+
+    public Point(Vector3 pos, float _confidence)
     {
         x = pos.x;
         y = pos.y;
         z = pos.z;
+        confidence = _confidence;
     }
-
 }
 
 public class PointCloudLogger : MonoBehaviour
 {
     public CubeBehaviour cube;
-    
+
 
     public ARPointCloudManager pointManager;
 
@@ -51,15 +53,26 @@ public class PointCloudLogger : MonoBehaviour
 
     public void PointCloudsChanged(ARPointCloudChangedEventArgs obj)
     {
-
         foreach (var pointsList in obj.updated)
         {
+            List<Vector3> positions = new List<Vector3>();
+            List<float> confidenceValues = new List<float>();
+
             foreach (var point in pointsList.positions)
             {
-                points.Add(new Point(point));
+                positions.Add(point);
+            }
+
+            foreach (var confidence in pointsList.confidenceValues)
+            {
+                confidenceValues.Add(confidence);
+            }
+
+            for (int i = 0; i < positions.Count; i++)
+            {
+                points.Add(new Point(positions[i], confidenceValues[i]));
             }
         }
-
     }
 
     public void ReportLog()
@@ -67,8 +80,8 @@ public class PointCloudLogger : MonoBehaviour
         Debug.Log(Application.persistentDataPath);
         File.WriteAllText(Application.persistentDataPath + "/pointsLog.txt", JsonConvert.SerializeObject(points));
         new NativeShare().AddFile(Application.persistentDataPath + "/pointsLog.txt")
-        .SetSubject("Subject goes here").SetText("Hello world!").SetCallback((result, shareTarget) => Debug.Log("Share result: " + result + ", selected app: " + shareTarget))
-        .Share();
+            .SetSubject("Subject goes here").SetText("Hello world!").SetCallback((result, shareTarget) => Debug.Log("Share result: " + result + ", selected app: " + shareTarget))
+            .Share();
     }
 
     // Update is called once per frame
