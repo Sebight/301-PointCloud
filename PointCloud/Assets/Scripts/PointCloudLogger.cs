@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using Newtonsoft.Json;
 using System.IO;
+using UnityEngine.UI;
 
 [System.Serializable]
 public class Point
@@ -33,6 +34,8 @@ public class PointCloudLogger : MonoBehaviour
     public List<Point> points = new List<Point>();
 
     private bool scan = false;
+
+    public Slider slider;
 
     public void StartScan()
     {
@@ -82,6 +85,13 @@ public class PointCloudLogger : MonoBehaviour
         new NativeShare().AddFile(Application.persistentDataPath + "/pointsLog.txt")
             .SetSubject("Subject goes here").SetText("Hello world!").SetCallback((result, shareTarget) => Debug.Log("Share result: " + result + ", selected app: " + shareTarget))
             .Share();
+    }
+
+    public void Visualize()
+    {
+        //Visualizace logika here
+        //points je array všech bodů
+        //slider.value je hodnota slideru => platí to, že porovnáváš point.confidence < slider.value
     }
 
     // Update is called once per frame
