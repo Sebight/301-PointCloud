@@ -1739,6 +1739,7 @@ MonoBehaviour:
   cube: {fileID: 861510442}
   pointManager: {fileID: 1337481014}
   points: []
+  slider: {fileID: 2099042308}
 --- !u!1001 &1381965167
 PrefabInstance:
   m_ObjectHideFlags: 0
