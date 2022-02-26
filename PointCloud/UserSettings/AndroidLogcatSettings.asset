@@ -3,7 +3,7 @@
     "m_SelectedPackage": {
         "deviceId": "ce051715ccec391e017e",
         "name": "com.DefaultCompany.PointCloud",
-        "processId": 2270,
+        "processId": 16227,
         "exited": false
     },
     "m_SelectedPriority": 0,
@@ -54,6 +54,12 @@
             "deviceId": "ce051715ccec391e017e",
             "name": "com.DefaultCompany.PointCloud",
             "processId": 2270,
+            "exited": false
+        },
+        {
+            "deviceId": "ce051715ccec391e017e",
+            "name": "com.DefaultCompany.PointCloud",
+            "processId": 16227,
             "exited": false
         }
     ],

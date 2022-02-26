@@ -20,10 +20,14 @@ public class PointsSpawner : MonoBehaviour
     [Range(0.0f, 1.0f)] public float slider;
 
     public float lastSliderChange = 0.0f;
+
+    public Transform parent;
     // public Slider slider;
 
 
     public CubeBehaviour cube;
+    public GameObject dotParticle;
+
 
     public bool log = false;
     public bool spawn = false;
@@ -49,14 +53,13 @@ public class PointsSpawner : MonoBehaviour
         for (int i = 0; i < points.Count; i++)
         {
             while (!spawn) yield return null;
-            GameObject point = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            GameObject point = Instantiate(dotParticle);
             point.transform.position = new Vector3(points[i].x, points[i].y, points[i].z);
             point.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
-            Debug.Log("[SpawnPoints] Progress (" + i + "/" + points.Count + ")");
+            point.transform.parent = parent;
             PointWrap wrap = new PointWrap();
             wrap.go = point;
             wrap.acualPoint = points[i];
-            Debug.Log(points[i].confidence);
             spawned.Add(wrap);
             yield return new WaitForSeconds(0.0001f);
         }
@@ -79,10 +82,19 @@ public class PointsSpawner : MonoBehaviour
         lastSliderChange = slider;
     }
 
+    
+    public void StartBenchmark()
+    {
+        log = true;
+        cube.gameObject.SetActive(true);
+        cube.speed = 2;
+        cube.move = true;
+        spawn = false;
+    }
     // Update is called once per frame
     void Update()
     {
-        FilterPoints();
+        // FilterPoints();
         if (log)
         {
             //cube.CheckCollision(points);
