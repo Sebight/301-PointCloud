@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
 using System.IO;
+using TMPro;
 using UnityEngine.UI;
 
 public class PointWrap
@@ -31,6 +32,8 @@ public class PointsSpawner : MonoBehaviour
 
     public bool log = false;
     public bool spawn = false;
+    
+    public TextMeshProUGUI text;
 
     // Start is called before the first frame update
     void Start()
@@ -61,6 +64,7 @@ public class PointsSpawner : MonoBehaviour
             wrap.go = point;
             wrap.acualPoint = points[i];
             spawned.Add(wrap);
+            text.text = spawned.Count.ToString();
             yield return new WaitForSeconds(0.0001f);
         }
     }
