@@ -38,7 +38,9 @@ public class PointsSpawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        points = JsonConvert.DeserializeObject<List<Point>>(File.ReadAllText(Application.dataPath + "/pointsList.txt"));
+        var textFile = Resources.Load<TextAsset>("pointsList");
+        // points = JsonConvert.DeserializeObject<List<Point>>(File.ReadAllText(Application.dataPath + "/pointsList.txt"));
+        points = JsonConvert.DeserializeObject<List<Point>>(textFile.text);
         StartCoroutine(SpawnPoints());
         //for (int i = 0; i < points.Count; i++)
         //{
