@@ -38,6 +38,7 @@ public class PointsSpawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Application.targetFrameRate = 60;
         var textFile = Resources.Load<TextAsset>("pointsList");
         // points = JsonConvert.DeserializeObject<List<Point>>(File.ReadAllText(Application.dataPath + "/pointsList.txt"));
         points = JsonConvert.DeserializeObject<List<Point>>(textFile.text);
@@ -58,12 +59,12 @@ public class PointsSpawner : MonoBehaviour
         for (int i = 0; i < points.Count; i++)
         {
             while (!spawn) yield return null;
-            GameObject point = Instantiate(dotParticle);
-            point.transform.position = new Vector3(points[i].x, points[i].y, points[i].z);
-            point.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
-            point.transform.parent = parent;
+            // GameObject point = Instantiate(dotParticle);
+            // point.transform.position = new Vector3(points[i].x, points[i].y, points[i].z);
+            // point.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
+            // point.transform.parent = parent;
             PointWrap wrap = new PointWrap();
-            wrap.go = point;
+            // wrap.go = point;
             wrap.acualPoint = points[i];
             spawned.Add(wrap);
             text.text = spawned.Count.ToString();

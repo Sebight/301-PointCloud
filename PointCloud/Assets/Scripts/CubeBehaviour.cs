@@ -48,15 +48,16 @@ public class CubeBehaviour : MonoBehaviour
 
             if (IsPointInCollider(collider, new Vector3(points[i].acualPoint.x, points[i].acualPoint.y, points[i].acualPoint.z)))
             {
-                ParticleSystem.MainModule settings = points[i].go.GetComponent<ParticleSystem>().main;
-                settings.startColor = new ParticleSystem.MinMaxGradient(Color.blue);
+                // ParticleSystem.MainModule settings = points[i].go.GetComponent<ParticleSystem>().main;
+                // settings.startColor = new ParticleSystem.MinMaxGradient(Color.blue);
                 pointsAffected++;
             }
+            
             else
             {
                 // points[i].go.GetComponent<MeshRenderer>().material.color = Color.gray;
-                ParticleSystem.MainModule settings = points[i].go.GetComponent<ParticleSystem>().main;
-                settings.startColor = new ParticleSystem.MinMaxGradient(Color.gray);
+                // ParticleSystem.MainModule settings = points[i].go.GetComponent<ParticleSystem>().main;
+                // settings.startColor = new ParticleSystem.MinMaxGradient(Color.gray);
             }
         }
 
