@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static PointCloudLogger;
+using System.Diagnostics;
 
 public class CubeBehaviour : MonoBehaviour
 {
@@ -24,8 +26,10 @@ public class CubeBehaviour : MonoBehaviour
         return false;
     }
 
-    public void CheckCollision(List<PointWrap> points)
+    public void CheckCollision(List<Point> points)
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         int pointsAffected = 0;
         for (int i = 0; i < points.Count; ++i)
         {
@@ -46,7 +50,7 @@ public class CubeBehaviour : MonoBehaviour
 
             #endregion
 
-            if (IsPointInCollider(collider, new Vector3(points[i].acualPoint.x, points[i].acualPoint.y, points[i].acualPoint.z)))
+            if (IsPointInCollider(collider, new Vector3(points[i].x, points[i].y, points[i].z)))
             {
                 // ParticleSystem.MainModule settings = points[i].go.GetComponent<ParticleSystem>().main;
                 // settings.startColor = new ParticleSystem.MinMaxGradient(Color.blue);
@@ -69,6 +73,12 @@ public class CubeBehaviour : MonoBehaviour
         {
             gameObject.GetComponent<MeshRenderer>().material.color = Color.white;
         }
+
+        stopwatch.Stop();
+        TimeSpan ts = stopwatch.Elapsed;
+        // string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+        long elapsedMillis = stopwatch.ElapsedMilliseconds;
+        UnityEngine.Debug.Log($"Time taken checking {points.Count} points: " + elapsedMillis+" ms");
     }
 
     [ContextMenu("Update Origin")]

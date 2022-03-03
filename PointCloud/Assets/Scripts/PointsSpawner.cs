@@ -32,7 +32,7 @@ public class PointsSpawner : MonoBehaviour
 
     public bool log = false;
     public bool spawn = false;
-    
+
     public TextMeshProUGUI text;
 
     // Start is called before the first frame update
@@ -42,7 +42,14 @@ public class PointsSpawner : MonoBehaviour
         var textFile = Resources.Load<TextAsset>("pointsList");
         // points = JsonConvert.DeserializeObject<List<Point>>(File.ReadAllText(Application.dataPath + "/pointsList.txt"));
         points = JsonConvert.DeserializeObject<List<Point>>(textFile.text);
-        StartCoroutine(SpawnPoints());
+
+        for (int i = 0; i < 50_000; i++)
+        {
+            Point point = new Point(new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)), 1f);
+            points.Add(point);
+        }
+            
+        // StartCoroutine(SpawnPoints());
         //for (int i = 0; i < points.Count; i++)
         //{
         //    if (i == 0)
@@ -86,10 +93,11 @@ public class PointsSpawner : MonoBehaviour
                 spawned[i].go.SetActive(true);
             }
         }
+
         lastSliderChange = slider;
     }
 
-    
+
     public void StartBenchmark()
     {
         log = true;
@@ -98,14 +106,16 @@ public class PointsSpawner : MonoBehaviour
         cube.move = true;
         spawn = false;
     }
+
     // Update is called once per frame
     void Update()
     {
         // FilterPoints();
         if (log)
         {
-            //cube.CheckCollision(points);
-            cube.CheckCollision(spawned);
+            log = false;
+            cube.CheckCollision(points);
+            // cube.CheckCollision(spawned);
         }
     }
 }
