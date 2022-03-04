@@ -13,10 +13,13 @@ public class Point
     public float y;
     public float z;
 
+    public Vector3 position;
+
     public float confidence;
 
     public Point(Vector3 pos, float _confidence)
     {
+        position = pos;
         x = pos.x;
         y = pos.y;
         z = pos.z;

@@ -42,6 +42,10 @@ public class PointsSpawner : MonoBehaviour
         var textFile = Resources.Load<TextAsset>("pointsList");
         // points = JsonConvert.DeserializeObject<List<Point>>(File.ReadAllText(Application.dataPath + "/pointsList.txt"));
         points = JsonConvert.DeserializeObject<List<Point>>(textFile.text);
+        for (int i = 0; i < points.Count; i++)
+        {
+            points[i].position = new Vector3(points[i].x, points[i].y, points[i].z);
+        }
 
         for (int i = 0; i < 50_000; i++)
         {
