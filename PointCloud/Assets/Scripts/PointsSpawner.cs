@@ -47,7 +47,7 @@ public class PointsSpawner : MonoBehaviour
             points[i].position = new Vector3(points[i].x, points[i].y, points[i].z);
         }
 
-        for (int i = 0; i < 50_000; i++)
+        for (int i = 0; i < 19_940_000; i++)
         {
             Point point = new Point(new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)), 1f);
             points.Add(point);
@@ -106,9 +106,9 @@ public class PointsSpawner : MonoBehaviour
     {
         log = true;
         cube.gameObject.SetActive(true);
-        cube.speed = 2;
-        cube.move = true;
-        spawn = false;
+        // cube.speed = 2;
+        // cube.move = true;
+        // spawn = false;
     }
 
     // Update is called once per frame

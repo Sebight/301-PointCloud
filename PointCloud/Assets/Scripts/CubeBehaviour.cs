@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 public class CubeBehaviour : MonoBehaviour
 {
-    public BoxCollider collider;
+    public MeshCollider collider;
 
     private Vector3 origin;
 
@@ -18,12 +18,13 @@ public class CubeBehaviour : MonoBehaviour
 
     public bool IsPointInCollider(Collider other, Vector3 point)
     {
-        if (other.ClosestPoint(point) == point)
-        {
-            return true;
-        }
+        return (other.ClosestPoint(point) == point);
+        // if (other.ClosestPoint(point) == point)
+        // {
+        //     return true;
+        // }
 
-        return false;
+        // return false;
     }
 
     public void CheckCollision(List<Point> points)
@@ -33,22 +34,6 @@ public class CubeBehaviour : MonoBehaviour
         int pointsAffected = 0;
         for (int i = 0; i < points.Count; ++i)
         {
-            #region OldCeck
-
-            // Point p = points[i].acualPoint;
-            // Vector3 colliderPos = collider.ClosestPoint(new Vector3(p.x, p.y, p.z));
-            // float distance = Vector3.Distance(colliderPos, new Vector3(p.x, p.y, p.z));
-            // if (distance < 0.1)
-            // {
-            //     points[i].go.GetComponent<MeshRenderer>().material.color = Color.green;
-            //     gameObject.GetComponent<MeshRenderer>().material.color = Color.red;
-            // } else
-            // {
-            //     points[i].go.GetComponent<MeshRenderer>().material.color = Color.gray;
-            //     gameObject.GetComponent<MeshRenderer>().material.color = Color.white;
-            // }
-
-            #endregion
 
             if (IsPointInCollider(collider, points[i].position))
             {
@@ -78,7 +63,8 @@ public class CubeBehaviour : MonoBehaviour
         TimeSpan ts = stopwatch.Elapsed;
         // string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
         long elapsedMillis = stopwatch.ElapsedMilliseconds;
-        UnityEngine.Debug.Log($"Time taken checking {points.Count} points: " + elapsedMillis + " ms");
+        UnityEngine.Debug.Log($"Time taken checking {points.Count} points: " + elapsedMillis + " ms ("+pointsAffected+")");
+
     }
 
     [ContextMenu("Update Origin")]
