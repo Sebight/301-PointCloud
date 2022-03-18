@@ -23,6 +23,8 @@ public class PointsSpawner : MonoBehaviour
     public float lastSliderChange = 0.0f;
 
     public Transform parent;
+
+    public ParticleSystem mainParticleSystem;
     // public Slider slider;
 
 
@@ -47,13 +49,13 @@ public class PointsSpawner : MonoBehaviour
             points[i].position = new Vector3(points[i].x, points[i].y, points[i].z);
         }
 
-        for (int i = 0; i < 19_940_000; i++)
+        for (int i = 0; i < 100_000; i++)
         {
             Point point = new Point(new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)), 1f);
             points.Add(point);
         }
             
-        // StartCoroutine(SpawnPoints());
+        StartCoroutine(SpawnPoints());
         //for (int i = 0; i < points.Count; i++)
         //{
         //    if (i == 0)
@@ -70,17 +72,15 @@ public class PointsSpawner : MonoBehaviour
         for (int i = 0; i < points.Count; i++)
         {
             while (!spawn) yield return null;
-            // GameObject point = Instantiate(dotParticle);
-            // point.transform.position = new Vector3(points[i].x, points[i].y, points[i].z);
-            // point.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
-            // point.transform.parent = parent;
-            PointWrap wrap = new PointWrap();
-            // wrap.go = point;
-            wrap.acualPoint = points[i];
-            spawned.Add(wrap);
-            text.text = spawned.Count.ToString();
-            yield return new WaitForSeconds(0.0001f);
+            var emitParams = new ParticleSystem.EmitParams();
+            emitParams.startColor = Color.blue;
+            emitParams.startSize = 0.05f;
+            emitParams.position = points[i].position;
+            mainParticleSystem.Emit(emitParams, 1);
+            mainParticleSystem.Play(); // Continue normal emissions
         }
+        
+        Debug.Log(points.Count);
     }
 
     public void FilterPoints()
