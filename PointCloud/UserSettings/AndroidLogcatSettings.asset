@@ -3,195 +3,57 @@
     "m_SelectedPackage": {
         "deviceId": "ce051715ccec391e017e",
         "name": "com.DefaultCompany.PointCloud",
-        "processId": 15523,
+        "processId": 23066,
         "exited": false
     },
     "m_SelectedPriority": 0,
     "m_KnownPackagesForSerialization": [
         {
             "deviceId": "ce051715ccec391e017e",
-            "name": "com.sec.android.app.launcher",
-            "processId": 6522,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 18269,
-            "exited": true
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 24666,
-            "exited": true
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 7486,
-            "exited": true
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 15836,
-            "exited": true
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 18452,
-            "exited": true
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 30844,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 2270,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 16227,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 15939,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 28814,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 19701,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 23162,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 16458,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 31206,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 1913,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 20158,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 26070,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 19065,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 21511,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 24302,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 29765,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 464,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 6803,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 8998,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
-            "name": "com.DefaultCompany.PointCloud",
-            "processId": 11413,
-            "exited": false
-        },
-        {
-            "deviceId": "ce051715ccec391e017e",
             "name": "com.DefaultCompany.PointCloud",
             "processId": 13432,
-            "exited": false
+            "exited": true
         },
         {
             "deviceId": "ce051715ccec391e017e",
             "name": "com.DefaultCompany.PointCloud",
             "processId": 15553,
-            "exited": false
+            "exited": true
         },
         {
             "deviceId": "ce051715ccec391e017e",
             "name": "com.DefaultCompany.PointCloud",
             "processId": 18067,
-            "exited": false
+            "exited": true
         },
         {
             "deviceId": "ce051715ccec391e017e",
             "name": "com.DefaultCompany.PointCloud",
             "processId": 13167,
-            "exited": false
+            "exited": true
         },
         {
             "deviceId": "ce051715ccec391e017e",
             "name": "com.DefaultCompany.PointCloud",
             "processId": 15523,
+            "exited": true
+        },
+        {
+            "deviceId": "ce051715ccec391e017e",
+            "name": "com.sec.android.app.launcher",
+            "processId": 6927,
+            "exited": false
+        },
+        {
+            "deviceId": "ce051715ccec391e017e",
+            "name": "com.DefaultCompany.PointCloud",
+            "processId": 20596,
+            "exited": false
+        },
+        {
+            "deviceId": "ce051715ccec391e017e",
+            "name": "com.DefaultCompany.PointCloud",
+            "processId": 23066,
             "exited": false
         }
     ],
