@@ -958,7 +958,23 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 6850754004250447198, guid: 3f4f687421adebb468d882d944f78473, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+    - target: {fileID: 6850754004250447198, guid: 3f4f687421adebb468d882d944f78473, type: 3}
       propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6850754004250447198, guid: 3f4f687421adebb468d882d944f78473, type: 3}
+      propertyPath: m_RenderMode
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6850754004250447198, guid: 3f4f687421adebb468d882d944f78473, type: 3}
+      propertyPath: m_MaxParticleSize
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 6850754004250447198, guid: 3f4f687421adebb468d882d944f78473, type: 3}
+      propertyPath: m_EnableGPUInstancing
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7021521574371462744, guid: 3f4f687421adebb468d882d944f78473, type: 3}
