@@ -58,36 +58,28 @@ public class Collisions : MonoBehaviour
         //DrawVolume();
     }
 
-    public void DrawVolume()
+    public void DrawVolume(List<Vector3> positions)
     {
-        float startX = exampleOrigin.x;
-        float endX = exampleOrigin.x + exampleSize.x;
-
-        float startY = exampleOrigin.y;
-        float endY = exampleOrigin.y + exampleSize.y;
-
-        float startZ = exampleOrigin.z;
-        float endZ = exampleOrigin.z + exampleSize.z;
-
-        positions = new List<Vector3>() { new Vector3(startX, startY, startZ), new Vector3(endX, startY, startZ), new Vector3(startX, endY, startZ), new Vector3(startX, startY, endZ), new Vector3(endX, endY, startZ), new Vector3(startX, endY, endZ), new Vector3(endX, endY, endZ), new Vector3(endX, startY, endZ) };
-
-
-        foreach (var go in gos)
+        if (gos.Count == 0)
         {
-            Destroy(go);
+            foreach (var position in positions)
+            {
+                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                cube.transform.position = position;
+                if (position == exampleOrigin) cube.GetComponent<MeshRenderer>().material.color = Color.yellow;
+                gos.Add(cube);
+            }
         }
 
-        foreach (var position in positions)
+        for (int i = 0; i < gos.Count; i++)
         {
-            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            cube.transform.position = position;
-            gos.Add(cube);
+            gos[i].transform.position = positions[i];
         }
     }
 
     void Start()
     {
-        dir = examplePoint.transform.position - volume.transform.position;
+        dir = examplePoint.transform.position - exampleOrigin;
         exampleOrigin = transform.position;
         volumeToPointDirection = examplePoint.transform.position - exampleOrigin;
 
@@ -100,34 +92,48 @@ public class Collisions : MonoBehaviour
         float startZ = exampleOrigin.z;
         float endZ = exampleOrigin.z + exampleSize.z;
 
-        positions = new List<Vector3>() { new Vector3(startX, startY, startZ), new Vector3(endX, startY, startZ), new Vector3(startX, endY, startZ), new Vector3(startX, startY, endZ), new Vector3(endX, endY, startZ), new Vector3(startX, endY, endZ), new Vector3(endX, endY, endZ), new Vector3(endX, startY, endZ) };
+        positions = new List<Vector3>() {new Vector3(startX, startY, startZ), new Vector3(endX, startY, startZ), new Vector3(startX, endY, startZ), new Vector3(startX, startY, endZ), new Vector3(endX, endY, startZ), new Vector3(startX, endY, endZ), new Vector3(endX, endY, endZ), new Vector3(endX, startY, endZ)};
 
-        //DrawVolume();
+        DrawVolume(positions);
     }
 
     void Update()
     {
+        // DrawVolume();
         // transform.position = Quaternion.Euler(rotateBy) * transform.position;
 
         //Keep the point in the same posiiton relative to the volume
-        examplePoint.transform.position = volume.transform.position + volume.transform.TransformVector(dir);
-        examplePoint.transform.rotation = volume.transform.rotation;
+        // examplePoint.transform.position = volume.transform.position + volume.transform.TransformVector(dir);
+        // examplePoint.transform.rotation = volume.transform.rotation;
+
 
         if (move)
         {
             move = false;
-            //this
-            //exampleOrigin = Quaternion.Euler(rotateBy) * exampleOrigin;
-            Debug.Log(volume.transform.position);
-            //DrawVolume();
+            for (int i = 0; i < positions.Count; i++)
+            {
+                Vector3 pos = positions[i];
+                pos = Quaternion.Euler(rotateBy) * pos;
+                positions[i] = pos;
+            }
+
+            exampleOrigin = positions[0];
+            DrawVolume(positions);
         }
 
         if (back)
         {
             back = false;
-            // Quaternion rot = volume.transform.rotation;
+            for (int i = 0; i < positions.Count; i++)
+            {
+                Vector3 pos = positions[i];
+                pos = Quaternion.Inverse(Quaternion.Euler(rotateBy)) * pos;
+                positions[i] = pos;
+            }
 
-            ReturnBack();
+            exampleOrigin = positions[0];
+            DrawVolume(positions);
+            // ReturnBack();
         }
 
         if (bp.IsPointInVolume(examplePoint.transform.position, exampleOrigin, exampleSize))
@@ -138,6 +144,7 @@ public class Collisions : MonoBehaviour
         {
             examplePoint.GetComponent<Renderer>().material.color = Color.black;
         }
-    }
 
+        examplePoint.transform.position = gos[0].transform.position + gos[0].transform.TransformVector(dir);
+    }
 }
