@@ -115,6 +115,7 @@ public class Collisions : MonoBehaviour
                 Vector3 pos = positions[i];
                 pos = Quaternion.Euler(rotateBy) * pos;
                 positions[i] = pos;
+                examplePoint.transform.position = Quaternion.Euler(rotateBy) * (examplePoint.transform.position - gos[0].transform.position) + gos[0].transform.position;
             }
 
             exampleOrigin = positions[0];
@@ -129,11 +130,11 @@ public class Collisions : MonoBehaviour
                 Vector3 pos = positions[i];
                 pos = Quaternion.Inverse(Quaternion.Euler(rotateBy)) * pos;
                 positions[i] = pos;
+                examplePoint.transform.position = Quaternion.Inverse(Quaternion.Euler(rotateBy)) * (examplePoint.transform.position - gos[0].transform.position) + gos[0].transform.position;
             }
 
             exampleOrigin = positions[0];
             DrawVolume(positions);
-            // ReturnBack();
         }
 
         if (bp.IsPointInVolume(examplePoint.transform.position, exampleOrigin, exampleSize))
@@ -145,6 +146,6 @@ public class Collisions : MonoBehaviour
             examplePoint.GetComponent<Renderer>().material.color = Color.black;
         }
 
-        examplePoint.transform.position = gos[0].transform.position + gos[0].transform.TransformVector(dir);
+        // examplePoint.transform.position = gos[0].transform.position + gos[0].transform.TransformVector(dir);
     }
 }
