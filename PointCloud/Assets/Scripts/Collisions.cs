@@ -110,12 +110,18 @@ public class Collisions : MonoBehaviour
         if (move)
         {
             move = false;
+            Vector3 centerOfVolume = new Vector3(exampleOrigin.x + exampleSize.x / 2, exampleOrigin.y + exampleSize.y / 2, exampleOrigin.z + exampleSize.z / 2);
+            //Instantiate 
+            // GameObject center = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            // center.transform.position = centerOfVolume;
+            // center.transform.localScale = new Vector3(1, 1, 1);
             for (int i = 0; i < positions.Count; i++)
             {
                 Vector3 pos = positions[i];
-                pos = Quaternion.Euler(rotateBy) * pos;
+                pos = Quaternion.Euler(rotateBy) * (pos - centerOfVolume) + centerOfVolume;
+                // pos = Quaternion.Euler(rotateBy) * pos;
                 positions[i] = pos;
-                examplePoint.transform.position = Quaternion.Euler(rotateBy) * (examplePoint.transform.position - gos[0].transform.position) + gos[0].transform.position;
+                // examplePoint.transform.position = Quaternion.Euler(rotateBy) * (examplePoint.transform.position - gos[0].transform.position) + gos[0].transform.position;
             }
 
             exampleOrigin = positions[0];
@@ -130,7 +136,7 @@ public class Collisions : MonoBehaviour
                 Vector3 pos = positions[i];
                 pos = Quaternion.Inverse(Quaternion.Euler(rotateBy)) * pos;
                 positions[i] = pos;
-                examplePoint.transform.position = Quaternion.Inverse(Quaternion.Euler(rotateBy)) * (examplePoint.transform.position - gos[0].transform.position) + gos[0].transform.position;
+                // examplePoint.transform.position = Quaternion.Inverse(Quaternion.Euler(rotateBy)) * (examplePoint.transform.position - gos[0].transform.position) + gos[0].transform.position;
             }
 
             exampleOrigin = positions[0];
