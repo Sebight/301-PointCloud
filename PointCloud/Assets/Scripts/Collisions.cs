@@ -46,6 +46,7 @@ public class Collisions : MonoBehaviour
     BetterPhysics bp = new BetterPhysics();
 
     List<Vector3> positions;
+    private Vector3 centerOfVolume;
 
     private List<GameObject> gos = new List<GameObject>();
 
@@ -93,7 +94,7 @@ public class Collisions : MonoBehaviour
         float endZ = exampleOrigin.z + exampleSize.z;
 
         positions = new List<Vector3>() {new Vector3(startX, startY, startZ), new Vector3(endX, startY, startZ), new Vector3(startX, endY, startZ), new Vector3(startX, startY, endZ), new Vector3(endX, endY, startZ), new Vector3(startX, endY, endZ), new Vector3(endX, endY, endZ), new Vector3(endX, startY, endZ)};
-
+        centerOfVolume = new Vector3((startX + endX) / 2, (startY + endY) / 2, (startZ + endZ) / 2);
         DrawVolume(positions);
     }
 
@@ -110,7 +111,6 @@ public class Collisions : MonoBehaviour
         if (move)
         {
             move = false;
-            Vector3 centerOfVolume = new Vector3(exampleOrigin.x + exampleSize.x / 2, exampleOrigin.y + exampleSize.y / 2, exampleOrigin.z + exampleSize.z / 2);
             //Instantiate 
             // GameObject center = GameObject.CreatePrimitive(PrimitiveType.Cube);
             // center.transform.position = centerOfVolume;
@@ -121,7 +121,7 @@ public class Collisions : MonoBehaviour
                 pos = Quaternion.Euler(rotateBy) * (pos - centerOfVolume) + centerOfVolume;
                 // pos = Quaternion.Euler(rotateBy) * pos;
                 positions[i] = pos;
-                // examplePoint.transform.position = Quaternion.Euler(rotateBy) * (examplePoint.transform.position - gos[0].transform.position) + gos[0].transform.position;
+                examplePoint.transform.position = Quaternion.Euler(rotateBy) * (examplePoint.transform.position - centerOfVolume) + centerOfVolume;
             }
 
             exampleOrigin = positions[0];
