@@ -52,6 +52,8 @@ public class Collisions : MonoBehaviour
 
     public Vector3 dir;
 
+    public Vector3 newCenterOfVolume;
+
     public void ReturnBack()
     {
         exampleOrigin = new Vector3(0, 0, 0);
@@ -78,7 +80,7 @@ public class Collisions : MonoBehaviour
         }
     }
 
-    public void DrawNewVolume(Vector3 size)
+    public Vector3 DrawNewVolume(Vector3 size)
     {
         Vector3 origin = new Vector3(0, 0, 0);
         float startX = origin.x;
@@ -91,13 +93,16 @@ public class Collisions : MonoBehaviour
         float endZ = origin.z + size.z;
 
         positions = new List<Vector3>() {new Vector3(startX, startY, startZ), new Vector3(endX, startY, startZ), new Vector3(startX, endY, startZ), new Vector3(startX, startY, endZ), new Vector3(endX, endY, startZ), new Vector3(startX, endY, endZ), new Vector3(endX, endY, endZ), new Vector3(endX, startY, endZ)};
-        
+
         foreach (var position in positions)
         {
             GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cube.transform.position = position;
             if (position == exampleOrigin) cube.GetComponent<MeshRenderer>().material.color = Color.yellow;
         }
+
+        newCenterOfVolume = new Vector3((startX + endX) / 2, (startY + endY) / 2, (startZ + endZ) / 2);
+        return newCenterOfVolume;
     }
 
     void Start()
@@ -118,13 +123,13 @@ public class Collisions : MonoBehaviour
         positions = new List<Vector3>() {new Vector3(startX, startY, startZ), new Vector3(endX, startY, startZ), new Vector3(startX, endY, startZ), new Vector3(startX, startY, endZ), new Vector3(endX, endY, startZ), new Vector3(startX, endY, endZ), new Vector3(endX, endY, endZ), new Vector3(endX, startY, endZ)};
         centerOfVolume = new Vector3((startX + endX) / 2, (startY + endY) / 2, (startZ + endZ) / 2);
         DrawVolume(positions);
-        
+
         for (int i = 0; i < positions.Count; i++)
         {
             Vector3 pos = positions[i];
             pos = Quaternion.Euler(rotateBy) * (pos - centerOfVolume) + centerOfVolume;
             positions[i] = pos;
-            examplePoint.transform.position = Quaternion.Euler(rotateBy) * (examplePoint.transform.position - centerOfVolume) + centerOfVolume;
+            // examplePoint.transform.position = Quaternion.Euler(rotateBy) * (examplePoint.transform.position - centerOfVolume) + centerOfVolume;
         }
 
         exampleOrigin = positions[0];
@@ -149,7 +154,7 @@ public class Collisions : MonoBehaviour
                 Vector3 pos = positions[i];
                 pos = Quaternion.Euler(rotateBy) * (pos - centerOfVolume) + centerOfVolume;
                 positions[i] = pos;
-                examplePoint.transform.position = Quaternion.Euler(rotateBy) * (examplePoint.transform.position - centerOfVolume) + centerOfVolume;
+                // examplePoint.transform.position = Quaternion.Euler(rotateBy) * (examplePoint.transform.position - centerOfVolume) + centerOfVolume;
             }
 
             exampleOrigin = positions[0];
@@ -169,9 +174,18 @@ public class Collisions : MonoBehaviour
             //
             // exampleOrigin = positions[0];
             // DrawVolume(positions);
-            
+
             //NEW SOLUTION
-            DrawNewVolume(exampleSize);
+            Vector3 newVolumeCenter = DrawNewVolume(exampleSize);
+
+            //Get the old volume direction between the center and the point
+            Vector3 oldVolumeDirection = examplePoint.transform.position - centerOfVolume;
+
+            //Place the point at the new center with direction of the old volume direction
+            examplePoint.transform.position = newVolumeCenter + oldVolumeDirection;
+
+            examplePoint.transform.position = Quaternion.Inverse(Quaternion.Euler(rotateBy)) * (examplePoint.transform.position - newVolumeCenter) + newVolumeCenter;
+
             back = false;
         }
 
@@ -179,10 +193,15 @@ public class Collisions : MonoBehaviour
         {
             examplePoint.GetComponent<Renderer>().material.color = Color.red;
         }
+        else if (bp.IsPointInVolume(examplePoint.transform.position, newCenterOfVolume, exampleSize))
+        {
+            examplePoint.GetComponent<Renderer>().material.color = Color.red;
+        }
         else
         {
             examplePoint.GetComponent<Renderer>().material.color = Color.black;
         }
+
 
         // examplePoint.transform.position = gos[0].transform.position + gos[0].transform.TransformVector(dir);
     }
