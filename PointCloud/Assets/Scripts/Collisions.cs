@@ -78,10 +78,32 @@ public class Collisions : MonoBehaviour
         }
     }
 
+    public void DrawNewVolume(Vector3 size)
+    {
+        Vector3 origin = new Vector3(0, 0, 0);
+        float startX = origin.x;
+        float endX = origin.x + size.x;
+
+        float startY = origin.y;
+        float endY = origin.y + size.y;
+
+        float startZ = origin.z;
+        float endZ = origin.z + size.z;
+
+        positions = new List<Vector3>() {new Vector3(startX, startY, startZ), new Vector3(endX, startY, startZ), new Vector3(startX, endY, startZ), new Vector3(startX, startY, endZ), new Vector3(endX, endY, startZ), new Vector3(startX, endY, endZ), new Vector3(endX, endY, endZ), new Vector3(endX, startY, endZ)};
+        
+        foreach (var position in positions)
+        {
+            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.transform.position = position;
+            if (position == exampleOrigin) cube.GetComponent<MeshRenderer>().material.color = Color.yellow;
+        }
+    }
+
     void Start()
     {
         dir = examplePoint.transform.position - exampleOrigin;
-        exampleOrigin = transform.position;
+        // exampleOrigin = transform.position;
         volumeToPointDirection = examplePoint.transform.position - exampleOrigin;
 
         float startX = exampleOrigin.x;
@@ -95,6 +117,17 @@ public class Collisions : MonoBehaviour
 
         positions = new List<Vector3>() {new Vector3(startX, startY, startZ), new Vector3(endX, startY, startZ), new Vector3(startX, endY, startZ), new Vector3(startX, startY, endZ), new Vector3(endX, endY, startZ), new Vector3(startX, endY, endZ), new Vector3(endX, endY, endZ), new Vector3(endX, startY, endZ)};
         centerOfVolume = new Vector3((startX + endX) / 2, (startY + endY) / 2, (startZ + endZ) / 2);
+        DrawVolume(positions);
+        
+        for (int i = 0; i < positions.Count; i++)
+        {
+            Vector3 pos = positions[i];
+            pos = Quaternion.Euler(rotateBy) * (pos - centerOfVolume) + centerOfVolume;
+            positions[i] = pos;
+            examplePoint.transform.position = Quaternion.Euler(rotateBy) * (examplePoint.transform.position - centerOfVolume) + centerOfVolume;
+        }
+
+        exampleOrigin = positions[0];
         DrawVolume(positions);
     }
 
@@ -111,15 +144,10 @@ public class Collisions : MonoBehaviour
         if (move)
         {
             move = false;
-            //Instantiate 
-            // GameObject center = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            // center.transform.position = centerOfVolume;
-            // center.transform.localScale = new Vector3(1, 1, 1);
             for (int i = 0; i < positions.Count; i++)
             {
                 Vector3 pos = positions[i];
                 pos = Quaternion.Euler(rotateBy) * (pos - centerOfVolume) + centerOfVolume;
-                // pos = Quaternion.Euler(rotateBy) * pos;
                 positions[i] = pos;
                 examplePoint.transform.position = Quaternion.Euler(rotateBy) * (examplePoint.transform.position - centerOfVolume) + centerOfVolume;
             }
@@ -130,17 +158,21 @@ public class Collisions : MonoBehaviour
 
         if (back)
         {
+            // back = false;
+            // for (int i = 0; i < positions.Count; i++)
+            // {
+            //     Vector3 pos = positions[i];
+            //     pos = Quaternion.Inverse(Quaternion.Euler(rotateBy)) * pos;
+            //     positions[i] = pos;
+            //     // examplePoint.transform.position = Quaternion.Inverse(Quaternion.Euler(rotateBy)) * (examplePoint.transform.position - gos[0].transform.position) + gos[0].transform.position;
+            // }
+            //
+            // exampleOrigin = positions[0];
+            // DrawVolume(positions);
+            
+            //NEW SOLUTION
+            DrawNewVolume(exampleSize);
             back = false;
-            for (int i = 0; i < positions.Count; i++)
-            {
-                Vector3 pos = positions[i];
-                pos = Quaternion.Inverse(Quaternion.Euler(rotateBy)) * pos;
-                positions[i] = pos;
-                // examplePoint.transform.position = Quaternion.Inverse(Quaternion.Euler(rotateBy)) * (examplePoint.transform.position - gos[0].transform.position) + gos[0].transform.position;
-            }
-
-            exampleOrigin = positions[0];
-            DrawVolume(positions);
         }
 
         if (bp.IsPointInVolume(examplePoint.transform.position, exampleOrigin, exampleSize))
