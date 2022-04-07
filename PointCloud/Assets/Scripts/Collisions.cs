@@ -2,37 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BetterPhysics
-{
-    public bool IsPointInVolume(Vector3 point, Vector3 volumeOrigin, Vector3 volumeDimensions)
-    {
-        float startX = volumeOrigin.x;
-        float endX = volumeOrigin.x + volumeDimensions.x;
-
-        float startY = volumeOrigin.y;
-        float endY = volumeOrigin.y + volumeDimensions.y;
-
-        float startZ = volumeOrigin.z;
-        float endZ = volumeOrigin.z + volumeDimensions.z;
-
-        bool x = false;
-        bool y = false;
-        bool z = false;
-
-        if (startX < point.x && point.x < endX) x = true;
-
-        if (startY < point.y && point.y < endY) y = true;
-
-        if (startZ < point.z && point.z < endZ) z = true;
-
-        return (x && y && z);
-    }
-}
 
 public class Collisions : MonoBehaviour
 {
     public bool move = false;
     public bool back = false;
+
+    public bool check = false;
 
     public GameObject examplePoint;
     public GameObject volume;
@@ -189,18 +165,13 @@ public class Collisions : MonoBehaviour
             back = false;
         }
 
-        if (bp.IsPointInVolume(examplePoint.transform.position, exampleOrigin, exampleSize))
+        if (check)
         {
-            examplePoint.GetComponent<Renderer>().material.color = Color.red;
+            check = false;
+            bool isPointInVolume = bp.IsPointInVolume(examplePoint.transform.position, exampleOrigin, exampleSize, rotateBy, examplePoint);
+            Debug.Log(isPointInVolume);
         }
-        else if (bp.IsPointInVolume(examplePoint.transform.position, newCenterOfVolume, exampleSize))
-        {
-            examplePoint.GetComponent<Renderer>().material.color = Color.red;
-        }
-        else
-        {
-            examplePoint.GetComponent<Renderer>().material.color = Color.black;
-        }
+        
 
 
         // examplePoint.transform.position = gos[0].transform.position + gos[0].transform.TransformVector(dir);
