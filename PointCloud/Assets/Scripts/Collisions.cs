@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 
 public class Collisions : MonoBehaviour
 {
-    public bool move = false;
+    private bool move = false;
     public bool back = false;
 
     public bool check = false;
@@ -17,7 +18,7 @@ public class Collisions : MonoBehaviour
     public Vector3 exampleSize;
     public Vector3 rotateBy;
 
-    public Vector3 volumeToPointDirection;
+    private Vector3 volumeToPointDirection;
 
     BetterPhysics bp = new BetterPhysics();
 
@@ -26,9 +27,9 @@ public class Collisions : MonoBehaviour
 
     private List<GameObject> gos = new List<GameObject>();
 
-    public Vector3 dir;
+    private Vector3 dir;
 
-    public Vector3 newCenterOfVolume;
+    private Vector3 newCenterOfVolume;
 
     public void ReturnBack()
     {
@@ -168,8 +169,14 @@ public class Collisions : MonoBehaviour
         if (check)
         {
             check = false;
-            bool isPointInVolume = bp.IsPointInVolume(examplePoint.transform.position, exampleOrigin, exampleSize, rotateBy, examplePoint);
-            Debug.Log(isPointInVolume);
+            Vector3 pointPos = examplePoint.transform.position;
+            Task checkTask = new Task(() =>
+            {
+                BetterPhysics physics = new BetterPhysics();
+                bool isPointInVolume = physics.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy);
+                Debug.Log(isPointInVolume);
+            });
+            checkTask.Start();
         }
         
 

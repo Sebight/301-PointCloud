@@ -2658,15 +2658,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74fdb865dc4e9461b83f717b5f7128dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  move: 0
   back: 0
+  check: 0
   examplePoint: {fileID: 957090207}
   volume: {fileID: 1823653760}
   exampleOrigin: {x: 15, y: 15, z: 15}
   exampleSize: {x: 10, y: 10, z: 10}
-  rotateBy: {x: 0, y: 35, z: 0}
-  volumeToPointDirection: {x: 0, y: 0, z: 0}
-  dir: {x: 0, y: 0, z: 0}
+  rotateBy: {x: 0, y: 89, z: 0}
 --- !u!65 &1823653762
 BoxCollider:
   m_ObjectHideFlags: 0
