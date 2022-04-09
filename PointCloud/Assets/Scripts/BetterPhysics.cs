@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 public class BetterPhysics
 {
@@ -49,6 +50,11 @@ public class BetterPhysics
         bool z = false;
         
         //BUG: This might be causing weird bugs when rotated
+        
+        // Debug.Log(newStartX + " "+point.x + " "+ newEndX);
+        // Debug.Log(newStartY + " "+point.y + " "+ newEndY);
+        // Debug.Log(newStartZ + " "+point.z + " "+ newEndZ);
+        
         if (newStartX <= point.x && point.x <= newEndX) x = true;
 
         if (newStartY <= point.y && point.y <= newEndY) y = true;
@@ -56,7 +62,7 @@ public class BetterPhysics
         if (newStartZ <= point.z && point.z <= newEndZ) z = true;
 
         s.Stop();
-        UnityEngine.Debug.Log(s.Elapsed);
+        // UnityEngine.Debug.Log(s.Elapsed);
         return (x && y && z);
     }
 }
