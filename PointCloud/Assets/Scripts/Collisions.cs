@@ -19,7 +19,6 @@ public class Collisions : MonoBehaviour
     public Vector3 exampleSize;
     public Vector3 rotateBy;
 
-    private Vector3 volumeToPointDirection;
 
     BetterPhysics bp = new BetterPhysics();
 
@@ -92,7 +91,7 @@ public class Collisions : MonoBehaviour
 
     void Start()
     {
-        callback = (isIn) =>
+        callback = (bool isIn) =>
         {
             if (isIn)
             {
@@ -103,9 +102,7 @@ public class Collisions : MonoBehaviour
                 examplePoint.GetComponent<MeshRenderer>().material.color = Color.red;
             }
         };
-        dir = examplePoint.transform.position - exampleOrigin;
         // exampleOrigin = transform.position;
-        volumeToPointDirection = examplePoint.transform.position - exampleOrigin;
 
         float startX = exampleOrigin.x;
         float endX = exampleOrigin.x + exampleSize.x;
@@ -184,7 +181,6 @@ public class Collisions : MonoBehaviour
 
             //Place the point at the new center with direction of the old volume direction
             examplePoint.transform.position = newVolumeCenter + oldVolumeDirection;
-
             examplePoint.transform.position =
                 Quaternion.Inverse(Quaternion.Euler(rotateBy)) * (examplePoint.transform.position - newVolumeCenter) +
                 newVolumeCenter;
@@ -196,6 +192,9 @@ public class Collisions : MonoBehaviour
         {
             check = false;
             // Vector3 pointPos = examplePoint.transform.position;
+            // BetterPhysics bp = new BetterPhysics();
+            // bool isPointInVolume = bp.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy, centerOfVolume);
+            // Vector3 pointPos = examplePoint.transform.position;
             // Task checkTask = new Task(() =>
             // {
             //     BetterPhysics physics = new BetterPhysics();
@@ -204,12 +203,11 @@ public class Collisions : MonoBehaviour
             // });
             // checkTask.Start();
         }
-
+        
         Vector3 pointPos = examplePoint.transform.position;
         BetterPhysics physics = new BetterPhysics();
-        bool isPointInVolume = physics.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy);
+        bool isPointInVolume = physics.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy, centerOfVolume);
         callback.Invoke(isPointInVolume);
 
-        // examplePoint.transform.position = gos[0].transform.position + gos[0].transform.TransformVector(dir);
     }
 }

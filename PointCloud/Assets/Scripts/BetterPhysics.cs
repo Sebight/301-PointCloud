@@ -8,7 +8,7 @@ using Debug = UnityEngine.Debug;
 
 public class BetterPhysics
 {
-    public bool IsPointInVolume(Vector3 point, Vector3 volumeOrigin, Vector3 volumeDimensions, Vector3 rotation)
+    public bool IsPointInVolume(Vector3 point, Vector3 volumeOrigin, Vector3 volumeDimensions, Vector3 rotation, Vector3 volumeCenter)
     {
         Stopwatch s = new Stopwatch();
         s.Start();
@@ -24,9 +24,6 @@ public class BetterPhysics
         float startZ = volumeOrigin.z;
         float endZ = volumeOrigin.z + volumeDimensions.z;
         
-        Vector3 centerOfOriginalVolume = new Vector3((startX + endX) / 2, (startY + endY) / 2, (startZ + endZ) / 2);
-        Vector3 originalDirection = point - centerOfOriginalVolume;
-        
         // New volume with reset origin
         Vector3 origin = new Vector3(0, 0, 0);
         
@@ -39,30 +36,29 @@ public class BetterPhysics
         float newStartZ = origin.z;
         float newEndZ = origin.z + volumeDimensions.z;
         
+        
         //Calculate the new center and place the point in the correct position
+        Vector3 centerOfOriginalVolume = volumeCenter;
+        Vector3 originalDirection = point - centerOfOriginalVolume;
+        
+        
         Vector3 newCenterOfVolume = new Vector3((newStartX + newEndX) / 2, (newStartY + newEndY) / 2, (newStartZ + newEndZ) / 2);
-        point = newCenterOfVolume + originalDirection;
-        point = Quaternion.Inverse(Quaternion.Euler(rotation)) * (point - newCenterOfVolume) + newCenterOfVolume;
-
+        Vector3 translatedPointPosition = newCenterOfVolume + originalDirection;
+        translatedPointPosition = Quaternion.Inverse(Quaternion.Euler(rotation)) * (translatedPointPosition - newCenterOfVolume) + newCenterOfVolume;
+        
         //Simple dimensions check
         bool x = false;
         bool y = false;
         bool z = false;
         
-        //BUG: This might be causing weird bugs when rotated
-        
-        // Debug.Log(newStartX + " "+point.x + " "+ newEndX);
-        // Debug.Log(newStartY + " "+point.y + " "+ newEndY);
-        // Debug.Log(newStartZ + " "+point.z + " "+ newEndZ);
-        
-        if (newStartX <= point.x && point.x <= newEndX) x = true;
+        if (newStartX <= translatedPointPosition.x && translatedPointPosition.x <= newEndX) x = true;
 
-        if (newStartY <= point.y && point.y <= newEndY) y = true;
+        if (newStartY <= translatedPointPosition.y && translatedPointPosition.y <= newEndY) y = true;
 
-        if (newStartZ <= point.z && point.z <= newEndZ) z = true;
+        if (newStartZ <= translatedPointPosition.z && translatedPointPosition.z <= newEndZ) z = true;
 
         s.Stop();
-        // UnityEngine.Debug.Log(s.Elapsed);
+        UnityEngine.Debug.Log(s.Elapsed);
         return (x && y && z);
     }
 }
