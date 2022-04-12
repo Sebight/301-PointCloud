@@ -58,7 +58,7 @@ public class BetterPhysics
         if (newStartZ <= translatedPointPosition.z && translatedPointPosition.z <= newEndZ) z = true;
 
         s.Stop();
-        UnityEngine.Debug.Log(s.Elapsed);
+        // UnityEngine.Debug.Log(s.Elapsed);
         return (x && y && z);
     }
 }

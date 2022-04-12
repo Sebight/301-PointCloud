@@ -47,11 +47,11 @@ public class PointsSpawner : MonoBehaviour
             points[i].position = new Vector3(points[i].x, points[i].y, points[i].z);
         }
 
-        for (int i = 0; i < 19_940_000; i++)
-        {
-            Point point = new Point(new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)), 1f);
-            points.Add(point);
-        }
+        // for (int i = 0; i < 19_940_000; i++)
+        // {
+        //     Point point = new Point(new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)), 1f);
+        //     points.Add(point);
+        // }
             
         // StartCoroutine(SpawnPoints());
         //for (int i = 0; i < points.Count; i++)
@@ -114,12 +114,12 @@ public class PointsSpawner : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // FilterPoints();
-        if (log)
-        {
-            log = false;
-            cube.CheckCollision(points);
-            // cube.CheckCollision(spawned);
-        }
+        // // FilterPoints();
+        // if (log)
+        // {
+        //     log = false;
+        //     cube.CheckCollision(points);
+        //     // cube.CheckCollision(spawned);
+        // }
     }
 }

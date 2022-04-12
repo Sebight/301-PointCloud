@@ -2665,6 +2665,7 @@ MonoBehaviour:
   exampleOrigin: {x: 15, y: 15, z: 15}
   exampleSize: {x: 10, y: 10, z: 10}
   rotateBy: {x: 210, y: 0, z: 0}
+  pointsSpawner: {fileID: 1285332262}
 --- !u!65 &1823653762
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 public class Collisions : MonoBehaviour
@@ -27,6 +28,8 @@ public class Collisions : MonoBehaviour
     private Vector3 newCenterOfVolume;
 
     private System.Action<bool> callback;
+
+    public PointsSpawner pointsSpawner;
 
     public void DrawVolume(List<Vector3> positions)
     {
@@ -83,11 +86,17 @@ public class Collisions : MonoBehaviour
         {
             if (isIn)
             {
-                examplePoint.GetComponent<MeshRenderer>().material.color = Color.green;
+                foreach (var volumeCorner in gos)
+                {
+                    volumeCorner.GetComponent<MeshRenderer>().material.color = Color.green;
+                }
             }
             else
             {
-                examplePoint.GetComponent<MeshRenderer>().material.color = Color.red;
+                foreach (var volumeCorner in gos)
+                {
+                    volumeCorner.GetComponent<MeshRenderer>().material.color = Color.red;
+                }
             }
         };
 
@@ -119,6 +128,54 @@ public class Collisions : MonoBehaviour
         DrawVolume(positions);
     }
 
+    private void RebuildVolume()
+    {
+        float startX = exampleOrigin.x;
+        float endX = exampleOrigin.x + exampleSize.x;
+
+        float startY = exampleOrigin.y;
+        float endY = exampleOrigin.y + exampleSize.y;
+
+        float startZ = exampleOrigin.z;
+        float endZ = exampleOrigin.z + exampleSize.z;
+
+        positions = new List<Vector3>()
+        {
+            new Vector3(startX, startY, startZ), new Vector3(endX, startY, startZ), new Vector3(startX, endY, startZ),
+            new Vector3(startX, startY, endZ), new Vector3(endX, endY, startZ), new Vector3(startX, endY, endZ),
+            new Vector3(endX, endY, endZ), new Vector3(endX, startY, endZ)
+        };
+        centerOfVolume = new Vector3((startX + endX) / 2, (startY + endY) / 2, (startZ + endZ) / 2);
+
+        for (int i = 0; i < positions.Count; i++)
+        {
+            Vector3 pos = positions[i];
+            pos = Quaternion.Euler(rotateBy) * (pos - centerOfVolume) + centerOfVolume;
+            positions[i] = pos;
+        }
+
+        // exampleOrigin = positions[0];
+        DrawVolume(positions);
+    }
+
+    private void ColorVolume(bool isIn)
+    {
+        if (isIn)
+        {
+            foreach (var volumeCorner in gos)
+            {
+                volumeCorner.GetComponent<MeshRenderer>().material.color = Color.green;
+            }
+        }
+        else
+        {
+            foreach (var volumeCorner in gos)
+            {
+                volumeCorner.GetComponent<MeshRenderer>().material.color = Color.red;
+            }
+        }
+    }
+
     void Update()
     {
         if (back)
@@ -140,7 +197,7 @@ public class Collisions : MonoBehaviour
 
         if (check)
         {
-            check = false;
+            // check = false;
             // Vector3 pointPos = examplePoint.transform.position;
             // BetterPhysics bp = new BetterPhysics();
             // bool isPointInVolume = bp.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy, centerOfVolume);
@@ -152,11 +209,29 @@ public class Collisions : MonoBehaviour
             //     Debug.Log(isPointInVolume);
             // });
             // checkTask.Start();
+            
+            Vector3 pointPos = examplePoint.transform.position;
+            // BetterPhysics physics = new BetterPhysics();
+            // bool isPointInVolume = physics.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy, centerOfVolume);
+            // callback.Invoke(isPointInVolume);
+            BetterPhysics physics = new BetterPhysics();
+            for (int i = 0; i < pointsSpawner.points.Count; i++)
+            {
+                Task<bool> t = new Task<bool>(() =>
+                {
+                    bool isPointInVolume = physics.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy, centerOfVolume);
+                    return isPointInVolume;
+                });
+                t.Start();
+                ColorVolume(t.Result);
+            }
         }
 
-        Vector3 pointPos = examplePoint.transform.position;
-        BetterPhysics physics = new BetterPhysics();
-        bool isPointInVolume = physics.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy, centerOfVolume);
-        callback.Invoke(isPointInVolume);
+        // Vector3 pointPos = examplePoint.transform.position;
+        // BetterPhysics physics = new BetterPhysics();
+        // bool isPointInVolume = physics.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy, centerOfVolume);
+        // callback.Invoke(isPointInVolume);
+        
+        RebuildVolume();
     }
 }
