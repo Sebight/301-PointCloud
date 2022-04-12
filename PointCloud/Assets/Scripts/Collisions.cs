@@ -20,25 +20,13 @@ public class Collisions : MonoBehaviour
     public Vector3 rotateBy;
 
 
-    BetterPhysics bp = new BetterPhysics();
-
     List<Vector3> positions;
     private Vector3 centerOfVolume;
-
     private List<GameObject> gos = new List<GameObject>();
-
-    private Vector3 dir;
 
     private Vector3 newCenterOfVolume;
 
     private System.Action<bool> callback;
-
-    public void ReturnBack()
-    {
-        exampleOrigin = new Vector3(0, 0, 0);
-        examplePoint.transform.position = new Vector3(0, 0, 0);
-        //DrawVolume();
-    }
 
     public void DrawVolume(List<Vector3> positions)
     {
@@ -102,7 +90,6 @@ public class Collisions : MonoBehaviour
                 examplePoint.GetComponent<MeshRenderer>().material.color = Color.red;
             }
         };
-        // exampleOrigin = transform.position;
 
         float startX = exampleOrigin.x;
         float endX = exampleOrigin.x + exampleSize.x;
@@ -120,14 +107,12 @@ public class Collisions : MonoBehaviour
             new Vector3(endX, endY, endZ), new Vector3(endX, startY, endZ)
         };
         centerOfVolume = new Vector3((startX + endX) / 2, (startY + endY) / 2, (startZ + endZ) / 2);
-        DrawVolume(positions);
 
         for (int i = 0; i < positions.Count; i++)
         {
             Vector3 pos = positions[i];
             pos = Quaternion.Euler(rotateBy) * (pos - centerOfVolume) + centerOfVolume;
             positions[i] = pos;
-            // examplePoint.transform.position = Quaternion.Euler(rotateBy) * (examplePoint.transform.position - centerOfVolume) + centerOfVolume;
         }
 
         exampleOrigin = positions[0];
@@ -136,43 +121,8 @@ public class Collisions : MonoBehaviour
 
     void Update()
     {
-        // DrawVolume();
-        // transform.position = Quaternion.Euler(rotateBy) * transform.position;
-
-        //Keep the point in the same posiiton relative to the volume
-        // examplePoint.transform.position = volume.transform.position + volume.transform.TransformVector(dir);
-        // examplePoint.transform.rotation = volume.transform.rotation;
-
-
-        if (move)
-        {
-            move = false;
-            for (int i = 0; i < positions.Count; i++)
-            {
-                Vector3 pos = positions[i];
-                pos = Quaternion.Euler(rotateBy) * (pos - centerOfVolume) + centerOfVolume;
-                positions[i] = pos;
-                // examplePoint.transform.position = Quaternion.Euler(rotateBy) * (examplePoint.transform.position - centerOfVolume) + centerOfVolume;
-            }
-
-            exampleOrigin = positions[0];
-            DrawVolume(positions);
-        }
-
         if (back)
         {
-            // back = false;
-            // for (int i = 0; i < positions.Count; i++)
-            // {
-            //     Vector3 pos = positions[i];
-            //     pos = Quaternion.Inverse(Quaternion.Euler(rotateBy)) * pos;
-            //     positions[i] = pos;
-            //     // examplePoint.transform.position = Quaternion.Inverse(Quaternion.Euler(rotateBy)) * (examplePoint.transform.position - gos[0].transform.position) + gos[0].transform.position;
-            // }
-            //
-            // exampleOrigin = positions[0];
-            // DrawVolume(positions);
-
             //NEW SOLUTION
             Vector3 newVolumeCenter = DrawNewVolume(exampleSize);
 
@@ -203,11 +153,10 @@ public class Collisions : MonoBehaviour
             // });
             // checkTask.Start();
         }
-        
+
         Vector3 pointPos = examplePoint.transform.position;
         BetterPhysics physics = new BetterPhysics();
         bool isPointInVolume = physics.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy, centerOfVolume);
         callback.Invoke(isPointInVolume);
-
     }
 }
