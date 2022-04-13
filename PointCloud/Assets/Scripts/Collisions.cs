@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -30,6 +31,8 @@ public class Collisions : MonoBehaviour
     private System.Action<bool> callback;
 
     public PointsSpawner pointsSpawner;
+
+    BetterPhysics physics = new BetterPhysics();
 
     public void DrawVolume(List<Vector3> positions)
     {
@@ -176,6 +179,8 @@ public class Collisions : MonoBehaviour
         }
     }
 
+    public void Check() => check = true;
+
     void Update()
     {
         if (back)
@@ -195,43 +200,29 @@ public class Collisions : MonoBehaviour
             back = false;
         }
 
+
         if (check)
         {
-            // check = false;
-            // Vector3 pointPos = examplePoint.transform.position;
-            // BetterPhysics bp = new BetterPhysics();
-            // bool isPointInVolume = bp.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy, centerOfVolume);
-            // Vector3 pointPos = examplePoint.transform.position;
-            // Task checkTask = new Task(() =>
-            // {
-            //     BetterPhysics physics = new BetterPhysics();
-            //     bool isPointInVolume = physics.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy);
-            //     Debug.Log(isPointInVolume);
-            // });
-            // checkTask.Start();
-            
-            Vector3 pointPos = examplePoint.transform.position;
-            // BetterPhysics physics = new BetterPhysics();
-            // bool isPointInVolume = physics.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy, centerOfVolume);
-            // callback.Invoke(isPointInVolume);
-            BetterPhysics physics = new BetterPhysics();
+            check = false;
+            Stopwatch sw = new Stopwatch();
             for (int i = 0; i < pointsSpawner.points.Count; i++)
             {
-                Task<bool> t = new Task<bool>(() =>
-                {
-                    bool isPointInVolume = physics.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy, centerOfVolume);
-                    return isPointInVolume;
-                });
-                t.Start();
-                ColorVolume(t.Result);
+                sw.Start();
+                Vector3 pointPos = pointsSpawner.points[i].position;
+                // Task<bool> t = new Task<bool>(() =>
+                // {
+                //     bool isPointInVolume = physics.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy, centerOfVolume);
+                //     return isPointInVolume;
+                // });
+                // t.Start();
+                // ColorVolume(t.Result);
+                bool isIn = physics.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy, centerOfVolume);
+                sw.Stop();
+                ColorVolume(isIn);
             }
+            UnityEngine.Debug.Log("Finished checking " + pointsSpawner.points.Count + " points in " + sw.ElapsedMilliseconds + " ms");
         }
 
-        // Vector3 pointPos = examplePoint.transform.position;
-        // BetterPhysics physics = new BetterPhysics();
-        // bool isPointInVolume = physics.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy, centerOfVolume);
-        // callback.Invoke(isPointInVolume);
-        
         RebuildVolume();
     }
 }

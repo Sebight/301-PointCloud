@@ -961,9 +961,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1285332262}
-        m_TargetAssemblyTypeName: PointsSpawner, Assembly-CSharp
-        m_MethodName: StartBenchmark
+      - m_Target: {fileID: 1823653761}
+        m_TargetAssemblyTypeName: Collisions, Assembly-CSharp
+        m_MethodName: Check
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
