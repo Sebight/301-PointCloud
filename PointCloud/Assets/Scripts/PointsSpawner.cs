@@ -46,12 +46,12 @@ public class PointsSpawner : MonoBehaviour
         {
             points[i].position = new Vector3(points[i].x, points[i].y, points[i].z);
         }
-        // points.RemoveRange(10000, points.Count - 10000);
-        for (int i = 0; i < 40_000; i++)
-        {
-            Point point = new Point(new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)), 1f);
-            points.Add(point);
-        }
+        points.RemoveRange(10000, points.Count - 10000);
+        // for (int i = 0; i < 40_000; i++)
+        // {
+        //     Point point = new Point(new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)), 1f);
+        //     points.Add(point);
+        // }
             
         // StartCoroutine(SpawnPoints());
         //for (int i = 0; i < points.Count; i++)
