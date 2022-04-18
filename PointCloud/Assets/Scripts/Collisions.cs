@@ -203,26 +203,19 @@ public class Collisions : MonoBehaviour
 
         if (check)
         {
+            //Timeslicing + parallelization  + check every x (maybe 4) seconds
             check = false;
             Stopwatch sw = new Stopwatch();
             for (int i = 0; i < pointsSpawner.points.Count; i++)
             {
-                sw.Start();
                 Vector3 pointPos = pointsSpawner.points[i].position;
-                // Task<bool> t = new Task<bool>(() =>
-                // {
-                //     bool isPointInVolume = physics.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy, centerOfVolume);
-                //     return isPointInVolume;
-                // });
-                // t.Start();
-                // ColorVolume(t.Result);
+                sw.Start();
                 bool isIn = physics.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy, centerOfVolume);
                 sw.Stop();
                 ColorVolume(isIn);
             }
             UnityEngine.Debug.Log("Finished checking " + pointsSpawner.points.Count + " points in " + sw.ElapsedMilliseconds + " ms");
         }
-
         RebuildVolume();
     }
 }

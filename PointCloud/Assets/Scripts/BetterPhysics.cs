@@ -10,11 +10,8 @@ public class BetterPhysics
 {
     public bool IsPointInVolume(Vector3 point, Vector3 volumeOrigin, Vector3 volumeDimensions, Vector3 rotation, Vector3 volumeCenter)
     {
-        Stopwatch s = new Stopwatch();
-        s.Start();
-        
         // Get the starting positions of volume
-        
+        //Rewrtie via volumeCenter
         float startX = volumeOrigin.x;
         float endX = volumeOrigin.x + volumeDimensions.x;
 
@@ -57,8 +54,6 @@ public class BetterPhysics
 
         if (newStartZ <= translatedPointPosition.z && translatedPointPosition.z <= newEndZ) z = true;
 
-        s.Stop();
-        // UnityEngine.Debug.Log(s.Elapsed);
         return (x && y && z);
     }
 }
