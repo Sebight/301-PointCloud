@@ -203,7 +203,7 @@ public class Collisions : MonoBehaviour
 
         if (check)
         {
-            //Timeslicing + parallelization  + check every x (maybe 4) seconds
+            // //Timeslicing + parallelization  + check every x (maybe 4) seconds
             check = false;
             Stopwatch sw = new Stopwatch();
             for (int i = 0; i < pointsSpawner.points.Count; i++)
@@ -215,6 +215,19 @@ public class Collisions : MonoBehaviour
                 ColorVolume(isIn);
             }
             UnityEngine.Debug.Log("Finished checking " + pointsSpawner.points.Count + " points in " + sw.ElapsedMilliseconds + " ms");
+            
+            
+            //----
+            //Visualization
+            //----
+            // if (physics.IsPointInVolume(examplePoint.transform.position, exampleSize, rotateBy, centerOfVolume))
+            // {
+            //     ColorVolume(true);
+            // }
+            // else
+            // {
+            //     ColorVolume(false);
+            // }
         }
         RebuildVolume();
     }
