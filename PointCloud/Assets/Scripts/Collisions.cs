@@ -210,7 +210,7 @@ public class Collisions : MonoBehaviour
             {
                 Vector3 pointPos = pointsSpawner.points[i].position;
                 sw.Start();
-                bool isIn = physics.IsPointInVolume(pointPos, exampleOrigin, exampleSize, rotateBy, centerOfVolume);
+                bool isIn = physics.IsPointInVolume(pointPos, exampleSize, rotateBy, centerOfVolume);
                 sw.Stop();
                 ColorVolume(isIn);
             }
