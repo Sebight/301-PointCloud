@@ -3,9 +3,28 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using Unity.Jobs;
+using Debug = UnityEngine.Debug;
 
+
+public struct VolumeJob : IJob
+{
+    public Vector3 point;
+    public Vector3 volumeDimensions;
+    public Vector3 rotation;
+    public Vector3 volumeCenter;
+    public NativeArray<bool> result;
+
+    public void Execute()
+    {
+        BetterPhysics physics = new BetterPhysics();
+        bool isIn = physics.IsPointInVolume(point, volumeDimensions, rotation, volumeCenter);
+        result[0] = isIn;
+    }
+}
 
 public class Collisions : MonoBehaviour
 {
@@ -203,20 +222,35 @@ public class Collisions : MonoBehaviour
 
         if (check)
         {
-            // //Timeslicing + parallelization  + check every x (maybe 4) seconds
+            // Timeslicing + parallelization  + check every x (maybe 4) seconds
             check = false;
             Stopwatch sw = new Stopwatch();
-            for (int i = 0; i < pointsSpawner.points.Count; i++)
-            {
-                Vector3 pointPos = pointsSpawner.points[i].position;
-                sw.Start();
-                bool isIn = physics.IsPointInVolume(pointPos, exampleSize, rotateBy, centerOfVolume);
-                sw.Stop();
-                ColorVolume(isIn);
-            }
+            // for (int i = 0; i < pointsSpawner.points.Count; i++)
+            // {
+            //     Vector3 pointPos = pointsSpawner.points[i].position;
+            //     sw.Start();
+            //     bool isIn = physics.IsPointInVolume(pointPos, exampleSize, rotateBy, centerOfVolume);
+            //     sw.Stop();
+            //     ColorVolume(isIn);
+            // }
+            sw.Start();
+            NativeArray<bool> _result = new NativeArray<bool>(1, Allocator.TempJob);
+            VolumeJob job = new VolumeJob();
+            job.point = pointsSpawner.points[0].position;
+            job.volumeDimensions = exampleSize;
+            job.rotation = rotateBy;
+            job.volumeCenter = centerOfVolume;
+            job.result = _result;
+
+            JobHandle handle = job.Schedule();
+            handle.Complete();
+            Debug.Log(_result[0]);
+            _result.Dispose();
+            sw.Stop();
+            
             UnityEngine.Debug.Log("Finished checking " + pointsSpawner.points.Count + " points in " + sw.ElapsedMilliseconds + " ms");
-            
-            
+
+
             //----
             //Visualization
             //----
@@ -229,6 +263,7 @@ public class Collisions : MonoBehaviour
             //     ColorVolume(false);
             // }
         }
+
         RebuildVolume();
     }
 }
