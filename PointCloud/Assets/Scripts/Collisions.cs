@@ -57,6 +57,9 @@ public class Collisions : MonoBehaviour
     BetterPhysics physics = new BetterPhysics();
 
     private int currentSegment = 0;
+    
+    bool inVolume = false;
+    List<Vector3> tempPoints = new List<Vector3>();
 
     public void DrawVolume(List<Vector3> positions)
     {
@@ -233,38 +236,29 @@ public class Collisions : MonoBehaviour
             check = false;
             Stopwatch sw = new Stopwatch();
 
-            // NativeArray<Vector3> tempPoints = new NativeArray<Vector3>(1, Allocator.TempJob);
-
-            // tempPoints[0] = pointsSpawner.points[0].position;
-            //
-            // NativeArray<bool> _result = new NativeArray<bool>(500, Allocator.TempJob);
-            // VolumeJob job = new VolumeJob();
-            // job.points = new NativeArray<Vector3>(tempPoints.ToArray(), Allocator.TempJob);
-            // job.volumeDimensions = exampleSize;
-            // job.rotation = rotateBy;
-            // job.volumeCenter = centerOfVolume;
-            // job.result = _result;
-            //
-            // JobHandle handle = job.Schedule();
-            // handle.Complete();
-            // _result.Dispose();
-            // job.points.Dispose();
+            inVolume = false;
             
-            
-            // sw.Start();
+            sw.Start();
 
             //Loop through segments with size of jobBuffer through points
+
+            int totalPoints = 0;
             for (int i = 0; i < pointsSpawner.points.Count; i += jobBuffer)
             {
+                tempPoints.Clear();
                 currentSegment++;
-                List<Vector3> tempPoints = new List<Vector3>();
                 int segmentStart = i;
                 int segmentEnd = i + jobBuffer;
                 for (int j = segmentStart; j < segmentEnd; j++)
                 {
+                    totalPoints++;
+                    if (j >= pointsSpawner.points.Count-1)
+                    {
+                        break;
+                    }
                     tempPoints.Add(pointsSpawner.points[j].position);
                 }
-            
+
                 NativeArray<bool> _result = new NativeArray<bool>(500, Allocator.TempJob);
                 VolumeJob job = new VolumeJob();
                 job.points = new NativeArray<Vector3>(tempPoints.ToArray(), Allocator.TempJob);
@@ -272,12 +266,11 @@ public class Collisions : MonoBehaviour
                 job.rotation = rotateBy;
                 job.volumeCenter = centerOfVolume;
                 job.result = _result;
-            
+
                 JobHandle handle = job.Schedule();
                 handle.Complete();
                 job.points.Dispose();
-            
-                bool inVolume = false;
+
                 foreach (bool pointResult in _result)
                 {
                     if (pointResult)
@@ -287,9 +280,10 @@ public class Collisions : MonoBehaviour
                     }
                 }
                 _result.Dispose();
-                Debug.Log(inVolume);
             }
-            // sw.Stop();
+            Debug.Log(inVolume);
+            Debug.Log(totalPoints);
+            sw.Stop();
 
             UnityEngine.Debug.Log("Finished checking " + pointsSpawner.points.Count + " points in " + sw.ElapsedMilliseconds + " ms");
 
