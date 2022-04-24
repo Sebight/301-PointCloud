@@ -233,7 +233,25 @@ public class Collisions : MonoBehaviour
             check = false;
             Stopwatch sw = new Stopwatch();
 
-            sw.Start();
+            // NativeArray<Vector3> tempPoints = new NativeArray<Vector3>(1, Allocator.TempJob);
+
+            // tempPoints[0] = pointsSpawner.points[0].position;
+            //
+            // NativeArray<bool> _result = new NativeArray<bool>(500, Allocator.TempJob);
+            // VolumeJob job = new VolumeJob();
+            // job.points = new NativeArray<Vector3>(tempPoints.ToArray(), Allocator.TempJob);
+            // job.volumeDimensions = exampleSize;
+            // job.rotation = rotateBy;
+            // job.volumeCenter = centerOfVolume;
+            // job.result = _result;
+            //
+            // JobHandle handle = job.Schedule();
+            // handle.Complete();
+            // _result.Dispose();
+            // job.points.Dispose();
+            
+            
+            // sw.Start();
 
             //Loop through segments with size of jobBuffer through points
             for (int i = 0; i < pointsSpawner.points.Count; i += jobBuffer)
@@ -246,7 +264,7 @@ public class Collisions : MonoBehaviour
                 {
                     tempPoints.Add(pointsSpawner.points[j].position);
                 }
-
+            
                 NativeArray<bool> _result = new NativeArray<bool>(500, Allocator.TempJob);
                 VolumeJob job = new VolumeJob();
                 job.points = new NativeArray<Vector3>(tempPoints.ToArray(), Allocator.TempJob);
@@ -254,12 +272,11 @@ public class Collisions : MonoBehaviour
                 job.rotation = rotateBy;
                 job.volumeCenter = centerOfVolume;
                 job.result = _result;
-
+            
                 JobHandle handle = job.Schedule();
                 handle.Complete();
-                _result.Dispose();
                 job.points.Dispose();
-
+            
                 bool inVolume = false;
                 foreach (bool pointResult in _result)
                 {
@@ -269,9 +286,10 @@ public class Collisions : MonoBehaviour
                         break;
                     }
                 }
+                _result.Dispose();
                 Debug.Log(inVolume);
             }
-            sw.Stop();
+            // sw.Stop();
 
             UnityEngine.Debug.Log("Finished checking " + pointsSpawner.points.Count + " points in " + sw.ElapsedMilliseconds + " ms");
 
