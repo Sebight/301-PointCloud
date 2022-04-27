@@ -244,7 +244,7 @@ public class Collisions : MonoBehaviour
 
             int totalPoints = 0;
             for (int i = 0; i < pointsSpawner.points.Count; i += jobBuffer)
-            {
+            { 
                 tempPoints.Clear();
                 currentSegment++;
                 int segmentStart = i;
