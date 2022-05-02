@@ -2034,14 +2034,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   points: []
-  slider: 0
-  lastSliderChange: 0
-  parent: {fileID: 1285332263}
-  cube: {fileID: 1098444044}
-  dotParticle: {fileID: 8313541113282596363, guid: 3f4f687421adebb468d882d944f78473, type: 3}
-  log: 0
-  spawn: 1
-  text: {fileID: 399926962}
 --- !u!4 &1285332263
 Transform:
   m_ObjectHideFlags: 0
@@ -2658,14 +2650,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74fdb865dc4e9461b83f717b5f7128dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  back: 0
   check: 0
   examplePoint: {fileID: 957090207}
-  volume: {fileID: 1823653760}
   exampleOrigin: {x: 15, y: 15, z: 15}
   exampleSize: {x: 10, y: 10, z: 10}
   rotateBy: {x: 210, y: 0, z: 0}
-  pointsSpawner: {fileID: 1285332262}
+  pointsManager: {fileID: 1285332262}
+  colliders: []
 --- !u!65 &1823653762
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -1,74 +1,112 @@
 using System;
 using UnityEngine;
 
-public class BetterPhysics
+namespace BP
 {
-    /// <summary>
-    /// Calculates if the point is within the rectangular volume defined from the parameters.
-    /// </summary>
-    /// <param name="point">Vector3 point which we want to work with.</param>
-    /// <param name="volumeDimensions">Size of volume</param>
-    /// <param name="rotation">Rotation of volume</param>
-    /// <param name="volumeCenter">Center of volume</param>
-    /// <returns>Boolean of if point is or is not in constructed volume.</returns>
-    public bool IsPointInVolume(Vector3 point, Vector3 volumeDimensions, Vector3 rotation, Vector3 volumeCenter)
+    [Serializable]
+    public class BetterPhysics
     {
-        // Calculate the original direction
-        Vector3 originalDirection = point - volumeCenter;
+        [Serializable]
+        public class Collider
+        {
+            public string Id;
+        }
 
-        // New volume with reset origin
-        Vector3 newCenterOfVolume = new Vector3(0, 0, 0);
+        [Serializable]
+        public class CubicCollider : Collider
+        {
+            public Vector3 Origin;
+            public Vector3 Size;
+            public Vector3 Rotation;
 
-        float newStartX = newCenterOfVolume.x - volumeDimensions.x / 2;
-        float newEndX = newCenterOfVolume.x + volumeDimensions.x / 2;
+            public CubicCollider(Vector3 origin, Vector3 size, Vector3 rotation)
+            {
+                Origin = origin;
+                Size = size;
+                Rotation = rotation;
+            }
+        }
 
-        float newStartY = newCenterOfVolume.y - volumeDimensions.y / 2;
-        float newEndY = newCenterOfVolume.y + volumeDimensions.y / 2;
+        [Serializable]
+        public class SphericalCollider : Collider
+        {
+            public Vector3 Origin;
+            public float Radius;
 
-        float newStartZ = newCenterOfVolume.z - volumeDimensions.z / 2;
-        float newEndZ = newCenterOfVolume.z + volumeDimensions.z / 2;
+            public SphericalCollider(Vector3 origin, float radius)
+            {
+                Origin = origin;
+                Radius = radius;
+            }
+        }
 
-        // Place the point in correct position
-        Vector3 translatedPointPosition = newCenterOfVolume + originalDirection;
-        translatedPointPosition = Quaternion.Inverse(Quaternion.Euler(rotation)) * (translatedPointPosition - newCenterOfVolume) + newCenterOfVolume;
+        /// <summary>
+        /// Calculates if the point is within the rectangular volume defined from the parameters.
+        /// </summary>
+        /// <param name="point">Vector3 point which we want to work with.</param>
+        /// <param name="volumeDimensions">Size of volume</param>
+        /// <param name="rotation">Rotation of volume</param>
+        /// <param name="volumeCenter">Center of volume</param>
+        /// <returns>Boolean of if point is or is not in constructed volume.</returns>
+        public bool IsPointInVolume(Vector3 point, Vector3 volumeDimensions, Vector3 rotation, Vector3 volumeCenter)
+        {
+            // Calculate the original direction
+            Vector3 originalDirection = point - volumeCenter;
 
-        //Simple dimensions check
-        bool x = false;
-        bool y = false;
-        bool z = false;
+            // New volume with reset origin
+            Vector3 newCenterOfVolume = new Vector3(0, 0, 0);
 
-        if (newStartX <= translatedPointPosition.x && translatedPointPosition.x <= newEndX) x = true;
+            float newStartX = newCenterOfVolume.x - volumeDimensions.x / 2;
+            float newEndX = newCenterOfVolume.x + volumeDimensions.x / 2;
 
-        if (newStartY <= translatedPointPosition.y && translatedPointPosition.y <= newEndY) y = true;
+            float newStartY = newCenterOfVolume.y - volumeDimensions.y / 2;
+            float newEndY = newCenterOfVolume.y + volumeDimensions.y / 2;
 
-        if (newStartZ <= translatedPointPosition.z && translatedPointPosition.z <= newEndZ) z = true;
+            float newStartZ = newCenterOfVolume.z - volumeDimensions.z / 2;
+            float newEndZ = newCenterOfVolume.z + volumeDimensions.z / 2;
 
-        return (x && y && z);
-    }
+            // Place the point in correct position
+            Vector3 translatedPointPosition = newCenterOfVolume + originalDirection;
+            translatedPointPosition = Quaternion.Inverse(Quaternion.Euler(rotation)) * (translatedPointPosition - newCenterOfVolume) + newCenterOfVolume;
 
-    /// <summary>
-    /// Calculates if the point is within the spherical volume defined from the parameters.
-    /// </summary>
-    /// <param name="point">Vector3 point in world-space which we calculate with.</param>
-    /// <param name="volumeCenter">Volume center in world-space.</param>
-    /// <param name="radius">Distance from center to border of sphere.</param>
-    /// <returns>Boolean of whether point is within volume or not.</returns>
-    public bool IsPointInVolume(Vector3 point, Vector3 volumeCenter, float radius)
-    {
-        // float centerToPointDistance = Vector3.Distance(point, volumeCenter);
-        // return (centerToPointDistance <= radius);
+            //Simple dimensions check
+            bool x = false;
+            bool y = false;
+            bool z = false;
 
-        float minX = volumeCenter.x - radius;
-        float maxX = volumeCenter.x + radius;
-        float minY = volumeCenter.y - radius;
-        float maxY = volumeCenter.y + radius;
-        float minZ = volumeCenter.z - radius;
-        float maxZ = volumeCenter.z + radius;
+            if (newStartX <= translatedPointPosition.x && translatedPointPosition.x <= newEndX) x = true;
 
-        bool x = minX <= point.x && point.x <= maxX;
-        bool y = minY <= point.y && point.y <= maxY;
-        bool z = minZ <= point.z && point.z <= maxZ;
+            if (newStartY <= translatedPointPosition.y && translatedPointPosition.y <= newEndY) y = true;
 
-        return (x && y && z);
+            if (newStartZ <= translatedPointPosition.z && translatedPointPosition.z <= newEndZ) z = true;
+
+            return (x && y && z);
+        }
+
+        /// <summary>
+        /// Calculates if the point is within the spherical volume defined from the parameters.
+        /// </summary>
+        /// <param name="point">Vector3 point in world-space which we calculate with.</param>
+        /// <param name="volumeCenter">Volume center in world-space.</param>
+        /// <param name="radius">Distance from center to border of sphere.</param>
+        /// <returns>Boolean of whether point is within volume or not.</returns>
+        public bool IsPointInVolume(Vector3 point, Vector3 volumeCenter, float radius)
+        {
+            // float centerToPointDistance = Vector3.Distance(point, volumeCenter);
+            // return (centerToPointDistance <= radius);
+
+            float minX = volumeCenter.x - radius;
+            float maxX = volumeCenter.x + radius;
+            float minY = volumeCenter.y - radius;
+            float maxY = volumeCenter.y + radius;
+            float minZ = volumeCenter.z - radius;
+            float maxZ = volumeCenter.z + radius;
+
+            bool x = minX <= point.x && point.x <= maxX;
+            bool y = minY <= point.y && point.y <= maxY;
+            bool z = minZ <= point.z && point.z <= maxZ;
+
+            return (x && y && z);
+        }
     }
 }
