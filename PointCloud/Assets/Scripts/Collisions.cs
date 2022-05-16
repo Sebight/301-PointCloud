@@ -243,7 +243,6 @@ public class Collisions : MonoBehaviour
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-
             Debug.Log(CheckPoints(pointsManager.Points, colliders[1]));
             sw.Stop();
 
@@ -254,6 +253,7 @@ public class Collisions : MonoBehaviour
         c.Origin = exampleOrigin;
         c.Size = exampleSize;
         c.Rotation = rotateBy;
+        
 
         RebuildVolume();
     }
