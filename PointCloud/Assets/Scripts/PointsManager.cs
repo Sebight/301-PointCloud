@@ -6,16 +6,11 @@ using System.IO;
 using TMPro;
 using UnityEngine.UI;
 
-public class PointWrap
-{
-    public GameObject go;
-    public Point acualPoint;
-}
-
 public class PointsManager : MonoBehaviour
 {
     public List<Point> points = new List<Point>();
 
+    //Holds all points loaded from the config file
     public List<Point> Points
     {
         get { return points; }

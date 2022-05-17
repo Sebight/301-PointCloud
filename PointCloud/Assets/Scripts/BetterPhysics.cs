@@ -10,6 +10,11 @@ namespace BP
         public class Collider
         {
             public string Id;
+
+            public Collider(string id)
+            {
+                this.Id = id;
+            }
         }
 
         [Serializable]
@@ -19,7 +24,7 @@ namespace BP
             public Vector3 Size;
             public Vector3 Rotation;
 
-            public CubicCollider(Vector3 origin, Vector3 size, Vector3 rotation)
+            public CubicCollider(Vector3 origin, Vector3 size, Vector3 rotation, string id) : base(id)
             {
                 Origin = origin;
                 Size = size;
@@ -33,7 +38,7 @@ namespace BP
             public Vector3 Origin;
             public float Radius;
 
-            public SphericalCollider(Vector3 origin, float radius)
+            public SphericalCollider(Vector3 origin, float radius, string id)  : base(id)
             {
                 Origin = origin;
                 Radius = radius;

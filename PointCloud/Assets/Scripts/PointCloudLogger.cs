@@ -34,7 +34,7 @@ public class PointCloudLogger : MonoBehaviour
 
     public ARPointCloudManager pointManager;
 
-    public List<Point> points = new List<Point>();
+    public List<Point> Points = new List<Point>();
 
     private bool scan = false;
 
@@ -76,7 +76,7 @@ public class PointCloudLogger : MonoBehaviour
 
             for (int i = 0; i < positions.Count; i++)
             {
-                points.Add(new Point(positions[i], confidenceValues[i]));
+                Points.Add(new Point(positions[i], confidenceValues[i]));
             }
         }
     }
@@ -84,17 +84,11 @@ public class PointCloudLogger : MonoBehaviour
     public void ReportLog()
     {
         Debug.Log(Application.persistentDataPath);
-        File.WriteAllText(Application.persistentDataPath + "/pointsLog.txt", JsonConvert.SerializeObject(points));
+        File.WriteAllText(Application.persistentDataPath + "/pointsLog.txt", JsonConvert.SerializeObject(Points));
         new NativeShare().AddFile(Application.persistentDataPath + "/pointsLog.txt")
-            .SetSubject("Subject goes here").SetText("Hello world!").SetCallback((result, shareTarget) => Debug.Log("Share result: " + result + ", selected app: " + shareTarget))
+            .SetSubject("Subject goes here").SetText("Hello world!").SetCallback((result, shareTarget) =>
+                Debug.Log("Share result: " + result + ", selected app: " + shareTarget))
             .Share();
-    }
-
-    public void Visualize()
-    {
-        //Visualizace logika here
-        //points je array všech bodů
-        //slider.value je hodnota slideru => platí to, že porovnáváš point.confidence < slider.value
     }
 
     // Update is called once per frame
