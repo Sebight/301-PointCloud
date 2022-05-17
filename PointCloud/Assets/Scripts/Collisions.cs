@@ -133,9 +133,9 @@ public class Collisions : MonoBehaviour
         #endregion
 
         //Register colliders
+        //TODO: Put this into individual function
         colliders.Add("cubic-1", new BetterPhysics.CubicCollider(exampleOrigin, exampleSize, rotateBy, "cubic-1"));
         colliders.Add("spherical-1", new BetterPhysics.SphericalCollider(new Vector3(5f, 0, 0), 5f, "spherical-1"));
-        
     }
 
     #region Visualization
@@ -179,6 +179,9 @@ public class Collisions : MonoBehaviour
     /// </summary>
     /// <param name="points">List of all recorded points</param>
     /// <param name="collider">BetterPhysics Collider of any type</param>
+    /// <param name="multithread">Indicates if the function should run as multithreaded or not.</param>
+    /// <param name="collisionFound">Callback which gets sent index of affected point(s).</param>
+    /// <param name="detectionMode">Indicates which detection mode should be used.</param>
     /// <returns>Boolean of whether any points from the list collides with the collider.</returns>
     public bool CheckPoints(List<Point> points, BetterPhysics.Collider collider, bool multithread = true,
         Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
@@ -295,6 +298,7 @@ public class Collisions : MonoBehaviour
 
                         pointIndex++;
                     }
+
                     _result.Dispose();
                 }
                 else if (detectionMode == DetectionMode.Enhanced)
@@ -310,6 +314,7 @@ public class Collisions : MonoBehaviour
 
                         pointIndex++;
                     }
+
                     _result.Dispose();
                 }
             }
@@ -322,6 +327,7 @@ public class Collisions : MonoBehaviour
                 collisionFound?.Invoke(pointIndex);
             }
         }
+
         return inVolume;
     }
 
@@ -333,10 +339,8 @@ public class Collisions : MonoBehaviour
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            Debug.Log(CheckPoints(pointsManager.Points, colliders["spherical-1"], true, (pointIndex) =>
-            {
-                Debug.Log("Point " + pointIndex + " is in the volume");
-            }, DetectionMode.Simple));
+            Debug.Log(CheckPoints(pointsManager.Points, colliders["spherical-1"], true,
+                (pointIndex) => { Debug.Log("Point " + pointIndex + " is in the volume"); }, DetectionMode.Simple));
             sw.Stop();
 
             UnityEngine.Debug.Log("Finished checking " + pointsManager.Points.Count + " points in " +
