@@ -92,21 +92,8 @@ namespace BP
         /// <returns>Boolean of whether point is within volume or not.</returns>
         public bool IsPointInVolume(Vector3 point, Vector3 volumeCenter, float radius)
         {
-            // float centerToPointDistance = Vector3.Distance(point, volumeCenter);
-            // return (centerToPointDistance <= radius);
-
-            float minX = volumeCenter.x - radius;
-            float maxX = volumeCenter.x + radius;
-            float minY = volumeCenter.y - radius;
-            float maxY = volumeCenter.y + radius;
-            float minZ = volumeCenter.z - radius;
-            float maxZ = volumeCenter.z + radius;
-
-            bool x = minX <= point.x && point.x <= maxX;
-            bool y = minY <= point.y && point.y <= maxY;
-            bool z = minZ <= point.z && point.z <= maxZ;
-
-            return (x && y && z);
+            float centerToPointDistance = Vector3.Distance(point, volumeCenter);
+            return (centerToPointDistance <= radius);
         }
     }
 }
