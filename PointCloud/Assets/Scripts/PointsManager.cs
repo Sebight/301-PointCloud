@@ -30,10 +30,10 @@ public class PointsManager : MonoBehaviour
 
         //! Testing and benchmarks
         // points.RemoveRange(10000, points.Count - 10000);
-        // for (int i = 0; i < 954_000; i++)
-        // {
-        //     Point point = new Point(new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)), 1f);
-        //     points.Add(point);
-        // }
+        for (int i = 0; i < 954_000; i++)
+        {
+            Point point = new Point(new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)), 1f);
+            points.Add(point);
+        }
     }
 }

@@ -55,19 +55,18 @@ public enum DetectionMode
 {
     Simple,
     Enhanced
-}   
+}
 
 public class Collisions : MonoBehaviour
 {
-
     //Variables used mostly for testing
-    public bool check = false; 
-    
-    private Vector3 exampleOrigin;
-    private Vector3 exampleSize;
-    private Vector3 rotateBy;
-    private Vector3 centerOfVolume;
-    private Vector3 newCenterOfVolume;
+    public bool check = false;
+
+    [SerializeField] private Vector3 exampleOrigin;
+    [SerializeField] private Vector3 exampleSize;
+    [SerializeField] private Vector3 rotateBy;
+    [SerializeField] private Vector3 centerOfVolume;
+    [SerializeField] private Vector3 newCenterOfVolume;
 
     //Variables used for visualization, could be deleted.
     private List<Vector3> positions;
@@ -181,6 +180,19 @@ public class Collisions : MonoBehaviour
         return collider;
     }
 
+    private List<Vector3> GetTempPoints(List<Point> points, int segmentStart, int segmentEnd)
+    {
+        List<Vector3> tempPoints = new List<Vector3>();
+        for (int j = segmentStart; j < segmentEnd; j++)
+        {
+            if (j >= points.Count - 1) break;
+
+            tempPoints.Add(points[j].position);
+        }
+
+        return tempPoints;
+    }
+
     /// <summary>
     ///    Checks if collider collides with any of the provided points.
     /// </summary>
@@ -234,15 +246,11 @@ public class Collisions : MonoBehaviour
 
             for (int i = 0; i < points.Count; i += jobBuffer)
             {
-                tempPoints.Clear();
                 int segmentStart = i;
                 int segmentEnd = i + jobBuffer;
-                for (int j = segmentStart; j < segmentEnd; j++)
-                {
-                    if (j >= points.Count - 1) break;
 
-                    tempPoints.Add(points[j].position);
-                }
+                tempPoints.Clear();
+                tempPoints = GetTempPoints(points, segmentStart, segmentEnd);
 
                 NativeArray<bool> _result = new NativeArray<bool>(jobBuffer, Allocator.TempJob);
 
@@ -333,6 +341,7 @@ public class Collisions : MonoBehaviour
         return inVolume;
     }
 
+
     /// <summary>
     /// Returns string,bool dictionary, which contains id of the collider and whether it is colliding or not.
     /// </summary>
@@ -342,16 +351,13 @@ public class Collisions : MonoBehaviour
     /// <param name="collisionFound">Callback which is sent the colliding point index.</param>
     /// <param name="detectionMode">Whether to send only one (the first colliding) point through the callback, or all that are colliding.</param>
     /// <returns></returns>
-    public Dictionary<string, bool> CheckPointsCollision(List<Point> points, List<BetterPhysics.Collider> colliders,
-        bool multithread = true,
-        Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
+    public Dictionary<string, bool> CheckPointsCollision(List<Point> points, List<BetterPhysics.Collider> colliders, bool multithread = true, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
     {
         Dictionary<string, bool> collisionResults = new Dictionary<string, bool>();
         //Same logic as CheckPointsCollision, but with a list of colliders
         foreach (BetterPhysics.Collider collider in colliders)
         {
-            bool collides = CheckPointsCollision(points, collider, multithread, (index) => Debug.Log(index + " is in."),
-                detectionMode);
+            bool collides = CheckPointsCollision(points, collider, multithread, (index) => Debug.Log(index + " is in."), detectionMode);
             collisionResults.Add(collider.Id, collides);
         }
 
@@ -367,19 +373,11 @@ public class Collisions : MonoBehaviour
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            // Debug.Log(CheckPointsCollision(pointsManager.Points, colliders["spherical-1"], true,
-            //     (pointIndex) => { Debug.Log("Point " + pointIndex + " is in the volume"); }, DetectionMode.Simple));
-            Dictionary<string, bool> results = CheckPointsCollision(pointsManager.Points, Colliders.Values.ToList(),
-                detectionMode: DetectionMode.Enhanced);
-            foreach (KeyValuePair<string, bool> result in results)
-            {
-                Debug.Log(result.Key + ": " + result.Value);
-            }
-
+            Debug.Log(CheckPointsCollision(pointsManager.Points, Colliders["cubic-1"], true, (pointIndex) => { Debug.Log("Point " + pointIndex + " is in the volume"); }, DetectionMode.Simple));
+            
             sw.Stop();
 
-            UnityEngine.Debug.Log("Finished checking " + pointsManager.Points.Count + " points in " +
-                                  sw.ElapsedMilliseconds + " ms");
+            Debug.Log("Finished checking " + pointsManager.Points.Count + " points in " + sw.ElapsedMilliseconds + " ms");
         }
 
         //Update the collider position => this doesn't need to be in Update(), but it could be at the place you move the collider from.
@@ -395,11 +393,5 @@ public class Collisions : MonoBehaviour
 
         //Visualization
         RebuildVolume();
-    }
-
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.blue;
-        Gizmos.DrawSphere(new Vector3(0, 0, 0), 1f);
     }
 }
