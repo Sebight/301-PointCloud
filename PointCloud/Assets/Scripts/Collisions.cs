@@ -55,21 +55,24 @@ public enum DetectionMode
 {
     Simple,
     Enhanced
-}
+}   
 
 public class Collisions : MonoBehaviour
 {
-    public bool check = false;
 
-    public Vector3 exampleOrigin;
-    public Vector3 exampleSize;
-    public Vector3 rotateBy;
+    //Variables used mostly for testing
+    public bool check = false; 
+    
+    private Vector3 exampleOrigin;
+    private Vector3 exampleSize;
+    private Vector3 rotateBy;
     private Vector3 centerOfVolume;
     private Vector3 newCenterOfVolume;
 
-
-    List<Vector3> positions;
+    //Variables used for visualization, could be deleted.
+    private List<Vector3> positions;
     private List<GameObject> gos = new List<GameObject>();
+
 
     public PointsManager pointsManager;
 
@@ -96,7 +99,7 @@ public class Collisions : MonoBehaviour
 
     #endregion
 
-    public Dictionary<string, BetterPhysics.Collider> Colliders = new Dictionary<string, BetterPhysics.Collider>();
+    public readonly Dictionary<string, BetterPhysics.Collider> Colliders = new Dictionary<string, BetterPhysics.Collider>();
 
     void Start()
     {
@@ -222,6 +225,8 @@ public class Collisions : MonoBehaviour
         }
         else
         {
+            //TODO: Split this into some sort of sections  ¯\_(ツ)_/¯.
+
             //How many points fit into one job
             int jobBuffer = 500;
 
@@ -234,15 +239,12 @@ public class Collisions : MonoBehaviour
                 int segmentEnd = i + jobBuffer;
                 for (int j = segmentStart; j < segmentEnd; j++)
                 {
-                    if (j >= points.Count - 1)
-                    {
-                        break;
-                    }
+                    if (j >= points.Count - 1) break;
 
                     tempPoints.Add(points[j].position);
                 }
 
-                NativeArray<bool> _result = new NativeArray<bool>(500, Allocator.TempJob);
+                NativeArray<bool> _result = new NativeArray<bool>(jobBuffer, Allocator.TempJob);
 
                 if (collider.GetType() == typeof(BetterPhysics.CubicCollider))
                 {
