@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Unity.Collections;
@@ -60,18 +61,16 @@ public class Collisions : MonoBehaviour
 {
     public bool check = false;
 
-    public GameObject examplePoint;
-
     public Vector3 exampleOrigin;
     public Vector3 exampleSize;
     public Vector3 rotateBy;
     private Vector3 centerOfVolume;
+    private Vector3 newCenterOfVolume;
 
 
     List<Vector3> positions;
     private List<GameObject> gos = new List<GameObject>();
 
-    private Vector3 newCenterOfVolume;
     public PointsManager pointsManager;
 
     #region Visualization
@@ -97,7 +96,7 @@ public class Collisions : MonoBehaviour
 
     #endregion
 
-    public Dictionary<string, BetterPhysics.Collider> colliders = new Dictionary<string, BetterPhysics.Collider>();
+    public Dictionary<string, BetterPhysics.Collider> Colliders = new Dictionary<string, BetterPhysics.Collider>();
 
     void Start()
     {
@@ -133,9 +132,8 @@ public class Collisions : MonoBehaviour
         #endregion
 
         //Register colliders
-        //TODO: Put this into individual function
-        colliders.Add("cubic-1", new BetterPhysics.CubicCollider(exampleOrigin, exampleSize, rotateBy, "cubic-1"));
-        colliders.Add("spherical-1", new BetterPhysics.SphericalCollider(new Vector3(5f, 0, 0), 5f, "spherical-1"));
+        RegisterCollider("cubic-1", new BetterPhysics.CubicCollider(exampleOrigin, exampleSize, rotateBy, "cubic-1"));
+        RegisterCollider("spherical-1", new BetterPhysics.SphericalCollider(new Vector3(0, 0, 0), 5f, "spherical-1"));
     }
 
     #region Visualization
@@ -174,6 +172,12 @@ public class Collisions : MonoBehaviour
 
     public void Check() => check = true;
 
+    public BetterPhysics.Collider RegisterCollider(string id, BetterPhysics.Collider collider)
+    {
+        Colliders.Add(id, collider);
+        return collider;
+    }
+
     /// <summary>
     ///    Checks if collider collides with any of the provided points.
     /// </summary>
@@ -183,15 +187,13 @@ public class Collisions : MonoBehaviour
     /// <param name="collisionFound">Callback which gets sent index of affected point(s).</param>
     /// <param name="detectionMode">Indicates which detection mode should be used.</param>
     /// <returns>Boolean of whether any points from the list collides with the collider.</returns>
-    public bool CheckPoints(List<Point> points, BetterPhysics.Collider collider, bool multithread = true,
-        Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
+    public bool CheckPointsCollision(List<Point> points, BetterPhysics.Collider collider, bool multithread = true, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
     {
-        //This can be messy to read at first, but when you understand the core of this function, it's pretty easy to understand.
-        //The idea is to check if the collider collides with any of the points. This is already implemented with multithreading, so it's pretty fast (but messy).
+        //* This can be messy to read at first, but when you understand the core of this function, it's pretty easy to understand.
+        //* The idea is to check if the collider collides with any of the points. This is already implemented with multithreading, so it's pretty fast (but messy).
 
         bool inVolume = false;
         List<int> affectedPoints = new List<int>();
-
 
         if (!multithread)
         {
@@ -200,7 +202,7 @@ public class Collisions : MonoBehaviour
             {
                 if (collider.GetType() == typeof(BetterPhysics.SphericalCollider))
                 {
-                    BetterPhysics.SphericalCollider sphere = (BetterPhysics.SphericalCollider) collider;
+                    BetterPhysics.SphericalCollider sphere = (BetterPhysics.SphericalCollider)collider;
                     if (physics.IsPointInVolume(points[i].position, sphere.Origin, sphere.Radius))
                     {
                         inVolume = true;
@@ -209,7 +211,7 @@ public class Collisions : MonoBehaviour
                 }
                 else if (collider.GetType() == typeof(BetterPhysics.CubicCollider))
                 {
-                    BetterPhysics.CubicCollider cube = (BetterPhysics.CubicCollider) collider;
+                    BetterPhysics.CubicCollider cube = (BetterPhysics.CubicCollider)collider;
                     if (physics.IsPointInVolume(points[i].position, cube.Size, cube.Rotation, exampleOrigin))
                     {
                         inVolume = true;
@@ -220,21 +222,18 @@ public class Collisions : MonoBehaviour
         }
         else
         {
-            int totalPoints = 0;
+            //How many points fit into one job
             int jobBuffer = 500;
-            int currentSegment = 0;
-            List<Vector3> tempPoints = new List<Vector3>();
 
+            List<Vector3> tempPoints = new List<Vector3>();
 
             for (int i = 0; i < points.Count; i += jobBuffer)
             {
                 tempPoints.Clear();
-                currentSegment++;
                 int segmentStart = i;
                 int segmentEnd = i + jobBuffer;
                 for (int j = segmentStart; j < segmentEnd; j++)
                 {
-                    totalPoints++;
                     if (j >= points.Count - 1)
                     {
                         break;
@@ -247,7 +246,7 @@ public class Collisions : MonoBehaviour
 
                 if (collider.GetType() == typeof(BetterPhysics.CubicCollider))
                 {
-                    BetterPhysics.CubicCollider col = (BetterPhysics.CubicCollider) collider;
+                    BetterPhysics.CubicCollider col = (BetterPhysics.CubicCollider)collider;
 
                     CubicJob job = new CubicJob();
                     job.points = new NativeArray<Vector3>(tempPoints.ToArray(), Allocator.TempJob);
@@ -262,7 +261,7 @@ public class Collisions : MonoBehaviour
                 }
                 else if (collider.GetType() == typeof(BetterPhysics.SphericalCollider))
                 {
-                    BetterPhysics.SphericalCollider col = (BetterPhysics.SphericalCollider) collider;
+                    BetterPhysics.SphericalCollider col = (BetterPhysics.SphericalCollider)collider;
 
                     SphericalJob job = new SphericalJob();
                     job.points = new NativeArray<Vector3>(tempPoints.ToArray(), Allocator.TempJob);
@@ -310,6 +309,7 @@ public class Collisions : MonoBehaviour
                         if (pointResult)
                         {
                             affectedPoints.Add(segmentStart + pointIndex);
+                            if (!inVolume) inVolume = true;
                         }
 
                         pointIndex++;
@@ -331,29 +331,67 @@ public class Collisions : MonoBehaviour
         return inVolume;
     }
 
+    /// <summary>
+    /// Returns string,bool dictionary, which contains id of the collider and whether it is colliding or not.
+    /// </summary>
+    /// <param name="points">List of all points</param>
+    /// <param name="colliders">List of colliders</param>
+    /// <param name="multithread">Whether to run the function multithread or not.</param>
+    /// <param name="collisionFound">Callback which is sent the colliding point index.</param>
+    /// <param name="detectionMode">Whether to send only one (the first colliding) point through the callback, or all that are colliding.</param>
+    /// <returns></returns>
+    public Dictionary<string, bool> CheckPointsCollision(List<Point> points, List<BetterPhysics.Collider> colliders,
+        bool multithread = true,
+        Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
+    {
+        Dictionary<string, bool> collisionResults = new Dictionary<string, bool>();
+        //Same logic as CheckPointsCollision, but with a list of colliders
+        foreach (BetterPhysics.Collider collider in colliders)
+        {
+            bool collides = CheckPointsCollision(points, collider, multithread, (index) => Debug.Log(index + " is in."),
+                detectionMode);
+            collisionResults.Add(collider.Id, collides);
+        }
+
+        return collisionResults;
+    }
+
     void Update()
     {
+        //Interaction with editor (usecase)
         if (check)
         {
             check = false;
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            Debug.Log(CheckPoints(pointsManager.Points, colliders["spherical-1"], true,
-                (pointIndex) => { Debug.Log("Point " + pointIndex + " is in the volume"); }, DetectionMode.Simple));
+            // Debug.Log(CheckPointsCollision(pointsManager.Points, colliders["spherical-1"], true,
+            //     (pointIndex) => { Debug.Log("Point " + pointIndex + " is in the volume"); }, DetectionMode.Simple));
+            Dictionary<string, bool> results = CheckPointsCollision(pointsManager.Points, Colliders.Values.ToList(),
+                detectionMode: DetectionMode.Enhanced);
+            foreach (KeyValuePair<string, bool> result in results)
+            {
+                Debug.Log(result.Key + ": " + result.Value);
+            }
+
             sw.Stop();
 
             UnityEngine.Debug.Log("Finished checking " + pointsManager.Points.Count + " points in " +
                                   sw.ElapsedMilliseconds + " ms");
         }
 
-        //This code is currently not safe.
-        BetterPhysics.CubicCollider c = (BetterPhysics.CubicCollider) colliders["cubic-1"];
-        c.Origin = exampleOrigin;
-        c.Size = exampleSize;
-        c.Rotation = rotateBy;
+        //Update the collider position => this doesn't need to be in Update(), but it could be at the place you move the collider from.
+        BetterPhysics.Collider col;
+        bool hasCollider = Colliders.TryGetValue("cubic-1", out col);
+        if (hasCollider)
+        {
+            BetterPhysics.CubicCollider c = (BetterPhysics.CubicCollider)col;
+            c.Origin = exampleOrigin;
+            c.Size = exampleSize;
+            c.Rotation = rotateBy;
+        }
 
-        //Collisions
+        //Visualization
         RebuildVolume();
     }
 

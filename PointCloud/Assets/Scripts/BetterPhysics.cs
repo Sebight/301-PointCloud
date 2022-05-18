@@ -38,7 +38,7 @@ namespace BP
             public Vector3 Origin;
             public float Radius;
 
-            public SphericalCollider(Vector3 origin, float radius, string id)  : base(id)
+            public SphericalCollider(Vector3 origin, float radius, string id) : base(id)
             {
                 Origin = origin;
                 Radius = radius;
