@@ -2664,6 +2664,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   check: 0
+  exampleOrigin: {x: 100, y: 10, z: 100}
+  exampleSize: {x: 10, y: 10, z: 10}
+  rotateBy: {x: 25, y: 0, z: 91}
+  centerOfVolume: {x: 0, y: 0, z: 0}
+  newCenterOfVolume: {x: 0, y: 0, z: 0}
   pointsManager: {fileID: 1285332262}
 --- !u!65 &1823653762
 BoxCollider:

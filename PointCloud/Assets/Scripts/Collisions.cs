@@ -20,6 +20,7 @@ public struct CubicJob : IJob
     public Vector3 rotation;
     public Vector3 volumeCenter;
     public NativeArray<bool> result;
+    public Action<NativeArray<bool>> callback;
 
     public void Execute()
     {
@@ -29,6 +30,9 @@ public struct CubicJob : IJob
             bool isIn = physics.IsPointInVolume(points[i], volumeDimensions, rotation, volumeCenter);
             result[i] = isIn;
         }
+        callback?.Invoke(result);
+        points.Dispose();
+        result.Dispose();
     }
 }
 
@@ -244,6 +248,11 @@ public class Collisions : MonoBehaviour
 
             List<Vector3> tempPoints = new List<Vector3>();
 
+            //Create nativearray to store all the jobHandles, with the appropriate size.
+            NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(points.Count / jobBuffer, Allocator.Temp);
+
+            int jobIndex = 0;            
+
             for (int i = 0; i < points.Count; i += jobBuffer)
             {
                 int segmentStart = i;
@@ -264,10 +273,23 @@ public class Collisions : MonoBehaviour
                     job.rotation = col.Rotation;
                     job.volumeCenter = col.Origin;
                     job.result = _result;
+                    job.callback = (boolArray) =>
+                    {
+                        foreach(bool b in boolArray)
+                        {
+                            if (b)
+                            {
+                                Debug.Log("Point in volume");
+                                inVolume = true;
+                                break;
+                            }
+                        }
+                    };
 
                     JobHandle handle = job.Schedule();
-                    handle.Complete();
-                    job.points.Dispose();
+                    jobHandles[jobIndex] = handle;
+                    // handle.Complete();
+                    // job.points.Dispose();
                 }
                 else if (collider.GetType() == typeof(BetterPhysics.SphericalCollider))
                 {
@@ -284,59 +306,63 @@ public class Collisions : MonoBehaviour
                     job.points.Dispose();
                 }
 
-                if (detectionMode == DetectionMode.Simple)
-                {
-                    if (inVolume)
-                    {
-                        _result.Dispose();
-                        break;
-                    }
+                // if (detectionMode == DetectionMode.Simple)
+                // {
+                //     if (inVolume)
+                //     {
+                //         _result.Dispose();
+                //         break;
+                //     }
+                //
+                //     int pointIndex = 0;
+                //     foreach (bool pointResult in _result)
+                //     {
+                //         if (pointResult)
+                //         {
+                //             inVolume = true;
+                //             //Convert the local pointIndex into the original point index
+                //             int originalIndex = segmentStart + pointIndex;
+                //             //Anything you want to do with the colliding point (keep in mind, that there might be more)
+                //             collisionFound?.Invoke(originalIndex);
+                //             break;
+                //         }
+                //
+                //         pointIndex++;
+                //     }
+                //
+                //     _result.Dispose();
+                // }
+                // else if (detectionMode == DetectionMode.Enhanced)
+                // {
+                //     //Gathers all the points that are inside the volume
+                //     int pointIndex = 0;
+                //     foreach (bool pointResult in _result)
+                //     {
+                //         if (pointResult)
+                //         {
+                //             affectedPoints.Add(segmentStart + pointIndex);
+                //             if (!inVolume) inVolume = true;
+                //         }
+                //
+                //         pointIndex++;
+                //     }
+                //
+                //     _result.Dispose();
+                // }
 
-                    int pointIndex = 0;
-                    foreach (bool pointResult in _result)
-                    {
-                        if (pointResult)
-                        {
-                            inVolume = true;
-                            //Convert the local pointIndex into the original point index
-                            int originalIndex = segmentStart + pointIndex;
-                            //Anything you want to do with the colliding point (keep in mind, that there might be more)
-                            collisionFound?.Invoke(originalIndex);
-                            break;
-                        }
-
-                        pointIndex++;
-                    }
-
-                    _result.Dispose();
-                }
-                else if (detectionMode == DetectionMode.Enhanced)
-                {
-                    //Gathers all the points that are inside the volume
-                    int pointIndex = 0;
-                    foreach (bool pointResult in _result)
-                    {
-                        if (pointResult)
-                        {
-                            affectedPoints.Add(segmentStart + pointIndex);
-                            if (!inVolume) inVolume = true;
-                        }
-
-                        pointIndex++;
-                    }
-
-                    _result.Dispose();
-                }
+                jobIndex++;
             }
+            
+            JobHandle.CompleteAll(jobHandles);
         }
 
-        if (detectionMode == DetectionMode.Enhanced)
-        {
-            foreach (int pointIndex in affectedPoints)
-            {
-                collisionFound?.Invoke(pointIndex);
-            }
-        }
+        // if (detectionMode == DetectionMode.Enhanced)
+        // {
+        //     foreach (int pointIndex in affectedPoints)
+        //     {
+        //         collisionFound?.Invoke(pointIndex);
+        //     }
+        // }
 
         return inVolume;
     }
