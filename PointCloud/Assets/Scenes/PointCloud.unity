@@ -2664,7 +2664,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   check: 0
-  exampleOrigin: {x: 0, y: 0, z: 0}
+  exampleOrigin: {x: -10, y: -10, z: 0}
   exampleSize: {x: 20, y: 20, z: 20}
   rotateBy: {x: 0, y: 0, z: 0}
   centerOfVolume: {x: 0, y: 0, z: 0}

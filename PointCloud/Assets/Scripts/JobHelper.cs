@@ -74,6 +74,11 @@ public class JobHelper : MonoBehaviour {
         
         private IJobDisposable Job;
 
+        /// <summary>
+        /// Custom added Result flag
+        /// </summary>
+        public bool Result;
+
         public JobExecution(IJobDisposable job, JobHandle handle, OnJobComplete onJobComplete, bool completeInLateUpdate, string jobTag)
         {
             this.Job = job;
@@ -170,8 +175,11 @@ public class JobHelper : MonoBehaviour {
     /// <param name="handle">Job Handle with scheduled job</param>
     /// <param name="onJobComplete">Delegate which is invoked after job is completed</param>
     /// <param name="completeImmediatelly">Complete this job immediately in the next LateUpdate() call?</param>
-    public static JobExecution AddScheduledJob(IJobDisposable job, JobHandle handle, OnJobComplete onJobComplete, bool completeImmediatelly = false, string tag = null) {
-        return JobHelper.GetInstance().AddJob(job, handle, onJobComplete, completeImmediatelly, tag);
+    public static JobExecution AddScheduledJob(IJobDisposable job, JobHandle handle, OnJobComplete onJobComplete, bool completeImmediatelly = false, string tag = null)
+    {
+        JobExecution toReturn = JobHelper.GetInstance().AddJob(job, handle, onJobComplete, completeImmediatelly, tag);
+        toReturn.Result = true;
+        return toReturn;
     }
 
     /// <summary>
