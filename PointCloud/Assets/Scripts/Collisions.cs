@@ -396,7 +396,7 @@ public class Collisions : MonoBehaviour
         //Interaction with editor (usecase)
         if (check)
         {
-            // check = false;
+            check = false;
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
@@ -415,7 +415,7 @@ public class Collisions : MonoBehaviour
             }));
             sw.Stop();
 
-            // Debug.Log("Finished checking " + pointsManager.Points.Count + " points in " + sw.ElapsedMilliseconds + " ms");
+            Debug.Log("Finished checking " + pointsManager.Points.Count + " points in " + sw.ElapsedMilliseconds + " ms");
         }
 
         //Update the collider position => this doesn't need to be in Update(), but it could be at the place you move the collider from.
@@ -425,8 +425,7 @@ public class Collisions : MonoBehaviour
         {
             BetterPhysics.CubicCollider c = (BetterPhysics.CubicCollider) col;
             //exampleOrigin is lower left corner => convert it to center
-            c.Origin = new Vector3(exampleOrigin.x + c.Size.x / 2, exampleOrigin.y + c.Size.y / 2,
-                exampleOrigin.z + c.Size.z / 2);
+            c.Origin = new Vector3(exampleOrigin.x + c.Size.x / 2, exampleOrigin.y + c.Size.y / 2, exampleOrigin.z + c.Size.z / 2);
             c.Size = exampleSize;
             c.Rotation = rotateBy;
         }
