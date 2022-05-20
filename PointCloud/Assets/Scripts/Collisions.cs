@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Unity.Collections;
 using UnityEngine;
 using Unity.Jobs;
@@ -10,51 +9,51 @@ using BP;
 
 public struct CubicJob : IJob, JobHelper.IJobDisposable
 {
-    public NativeArray<Vector3> points;
-    public Vector3 volumeDimensions;
-    public Vector3 rotation;
-    public Vector3 volumeCenter;
-    public NativeArray<bool> result;
+    public NativeArray<Vector3> Points;
+    public Vector3 VolumeDimensions;
+    public Vector3 Rotation;
+    public Vector3 VolumeCenter;
+    public NativeArray<bool> Result;
 
     public void Execute()
     {
         BetterPhysics physics = new BetterPhysics();
-        for (int i = 0; i < points.Length; i++)
+        for (int i = 0; i < Points.Length; i++)
         {
-            bool isIn = physics.IsPointInVolume(points[i], volumeDimensions, rotation, volumeCenter);
-            result[i] = isIn;
+            bool isIn = physics.IsPointInVolume(Points[i], VolumeDimensions, Rotation, VolumeCenter);
+            Result[i] = isIn;
         }
     }
 
     public void OnDispose()
     {
-        points.Dispose();
-        result.Dispose();
+        Points.Dispose();
+        Result.Dispose();
     }
 }
 
 
 public struct SphericalJob : IJob, JobHelper.IJobDisposable
 {
-    public NativeArray<Vector3> points;
-    public Vector3 volumeCenter;
-    public float radius;
-    public NativeArray<bool> result;
+    public NativeArray<Vector3> Points;
+    public Vector3 VolumeCenter;
+    public float Radius;
+    public NativeArray<bool> Result;
 
     public void Execute()
     {
         BetterPhysics physics = new BetterPhysics();
-        for (int i = 0; i < points.Length; i++)
+        for (int i = 0; i < Points.Length; i++)
         {
-            bool isIn = physics.IsPointInVolume(points[i], volumeCenter, radius);
-            result[i] = isIn;
+            bool isIn = physics.IsPointInVolume(Points[i], VolumeCenter, Radius);
+            Result[i] = isIn;
         }
     }
 
     public void OnDispose()
     {
-        points.Dispose();
-        result.Dispose();
+        Points.Dispose();
+        Result.Dispose();
     }
 }
 
@@ -72,8 +71,6 @@ public class Collisions : MonoBehaviour
     [SerializeField] private Vector3 exampleOrigin;
     [SerializeField] private Vector3 exampleSize;
     [SerializeField] private Vector3 rotateBy;
-    [SerializeField] private Vector3 centerOfVolume;
-    [SerializeField] private Vector3 newCenterOfVolume;
 
     public PointsManager pointsManager;
 
@@ -81,7 +78,6 @@ public class Collisions : MonoBehaviour
 
     void Start()
     {
-
         //Register colliders
         RegisterCollider("cubic-1", new BetterPhysics.CubicCollider(exampleOrigin, exampleSize, rotateBy, "cubic-1"));
         RegisterCollider("spherical-1", new BetterPhysics.SphericalCollider(new Vector3(100, 0, 0), 5f, "spherical-1"));
@@ -89,10 +85,6 @@ public class Collisions : MonoBehaviour
         //Prepare the worker threads => run CheckPointsCollisionAsnyc once.
         CheckPointsCollisionAsync(pointsManager.Points, new List<BetterPhysics.Collider>() { Colliders["cubic-1"], Colliders["spherical-1"] }, (b) => { });
     }
-
-
-    //Testing
-    public void Check() => check = true;
 
     /// <summary>
     /// Registers new collider.
@@ -236,11 +228,11 @@ public class Collisions : MonoBehaviour
                 BetterPhysics.CubicCollider col = (BetterPhysics.CubicCollider)collider;
 
                 CubicJob job = new CubicJob();
-                job.points = new NativeArray<Vector3>(tempPoints.ToArray(), Allocator.TempJob);
-                job.volumeDimensions = col.Size;
-                job.rotation = col.Rotation;
-                job.volumeCenter = col.Origin;
-                job.result = _result;
+                job.Points = new NativeArray<Vector3>(tempPoints.ToArray(), Allocator.TempJob);
+                job.VolumeDimensions = col.Size;
+                job.Rotation = col.Rotation;
+                job.VolumeCenter = col.Origin;
+                job.Result = _result;
 
 
                 JobHelper.JobExecution execution = JobHelper.AddScheduledJob(job, job.Schedule(), (jobExecutor) =>
@@ -260,10 +252,10 @@ public class Collisions : MonoBehaviour
                 BetterPhysics.SphericalCollider col = (BetterPhysics.SphericalCollider)collider;
 
                 SphericalJob job = new SphericalJob();
-                job.points = new NativeArray<Vector3>(tempPoints.ToArray(), Allocator.TempJob);
-                job.volumeCenter = col.Origin;
-                job.radius = col.Radius;
-                job.result = _result;
+                job.Points = new NativeArray<Vector3>(tempPoints.ToArray(), Allocator.TempJob);
+                job.VolumeCenter = col.Origin;
+                job.Radius = col.Radius;
+                job.Result = _result;
 
                 JobHelper.JobExecution execution = JobHelper.AddScheduledJob(job, job.Schedule(), (jobExecutor) =>
                 {
@@ -290,7 +282,6 @@ public class Collisions : MonoBehaviour
             int pointIndex = 0;
             foreach (KeyValuePair<int, bool> pointResult in resultsWithIndices)
             {
-                // Debug.Log(pointResult + " - " + (segmentStart + pointIndex));
                 if (pointResult.Value)
                 {
                     inVolume = true;
@@ -359,19 +350,41 @@ public class Collisions : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Updates colliders meta data.
+    /// </summary>
+    /// <param name="id">id of collider we want to update.</param>
+    /// <param name="colliderData">Collider object which contains data we want to set.</param>
+    public void UpdateColliderData(string id, BetterPhysics.Collider colliderData)
+    {
+        BetterPhysics.Collider col;
+        bool hasCollider = Colliders.TryGetValue(id, out col);
+        if (hasCollider)
+        {
+            if (col.GetType() == typeof(BetterPhysics.CubicCollider))
+            {
+                BetterPhysics.CubicCollider cubicCol = (BetterPhysics.CubicCollider)col;
+                BetterPhysics.CubicCollider colliderDataConverted = (BetterPhysics.CubicCollider)colliderData;
+                cubicCol.Origin = colliderDataConverted.Origin;
+                cubicCol.Size = colliderDataConverted.Size;
+                cubicCol.Rotation = colliderDataConverted.Rotation;
+                
+                Colliders[id] = cubicCol;
+            } else if (col.GetType() == typeof(BetterPhysics.SphericalCollider))
+            {
+                BetterPhysics.SphericalCollider sphericalCol = (BetterPhysics.SphericalCollider)col;
+                BetterPhysics.SphericalCollider colliderDataConverted = (BetterPhysics.SphericalCollider)colliderData;
+                sphericalCol.Origin = colliderDataConverted.Origin;
+                sphericalCol.Radius = colliderDataConverted.Radius;
+                
+                Colliders[id] = sphericalCol;
+            }
+        }
+    }
+
     void Update()
     {
         //Update the collider position => this doesn't need to be in Update(), but it could be at the place you move the collider from.
-        BetterPhysics.Collider col;
-        bool hasCollider = Colliders.TryGetValue("cubic-1", out col);
-        if (hasCollider)
-        {
-            BetterPhysics.CubicCollider c = (BetterPhysics.CubicCollider)col;
-            //exampleOrigin is lower left corner => convert it to center
-            c.Origin = new Vector3(exampleOrigin.x + c.Size.x / 2, exampleOrigin.y + c.Size.y / 2, exampleOrigin.z + c.Size.z / 2);
-            c.Size = exampleSize;
-            c.Rotation = rotateBy;
-        }
-
+        UpdateColliderData("cubic-1", new BetterPhysics.CubicCollider(exampleOrigin, exampleSize, rotateBy, ""));
     }
 }

@@ -13,7 +13,7 @@ namespace BP
 
             public Collider(string id)
             {
-                this.Id = id;
+                Id = id;
             }
         }
 
