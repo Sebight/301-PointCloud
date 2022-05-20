@@ -24,9 +24,6 @@ public struct CubicJob : IJob, JobHelper.IJobDisposable
             bool isIn = physics.IsPointInVolume(points[i], volumeDimensions, rotation, volumeCenter);
             result[i] = isIn;
         }
-        // Debug.Log("Job is done!");
-        // points.Dispose();
-        // result.Dispose();
     }
 
     public void OnDispose()
@@ -78,7 +75,7 @@ public class Collisions : MonoBehaviour
     [SerializeField] private Vector3 centerOfVolume;
     [SerializeField] private Vector3 newCenterOfVolume;
 
-    //Variables used for visualization, could be deleted.
+    //Variables used for visualization, can be deleted.
     private List<Vector3> positions;
     private List<GameObject> gos = new List<GameObject>();
 
@@ -108,8 +105,7 @@ public class Collisions : MonoBehaviour
 
     #endregion
 
-    public readonly Dictionary<string, BetterPhysics.Collider> Colliders =
-        new Dictionary<string, BetterPhysics.Collider>();
+    public readonly Dictionary<string, BetterPhysics.Collider> Colliders = new Dictionary<string, BetterPhysics.Collider>();
 
     void Start()
     {
@@ -188,14 +184,28 @@ public class Collisions : MonoBehaviour
 
     public void Check() => check = true;
 
+    /// <summary>
+    /// Registers new collider.
+    /// </summary>
+    /// <param name="id">Unique indetification of newly created collider.</param>
+    /// <param name="collider">Collider object</param>
+    /// <returns>Newly created collider.</returns>
     public BetterPhysics.Collider RegisterCollider(string id, BetterPhysics.Collider collider)
     {
         Colliders.Add(id, collider);
         return collider;
     }
 
+    /// <summary>
+    /// Creates new List of points which are suppoed to be passed into a job.
+    /// </summary>
+    /// <param name="points">List of all points</param>
+    /// <param name="segmentStart">First index of the desired points.</param>
+    /// <param name="segmentEnd">Last index of the desired points</param>
+    /// <returns></returns>
     private List<Vector3> GetTempPoints(List<Point> points, int segmentStart, int segmentEnd)
     {
+        //TODO: Could be written using Range.
         List<Vector3> tempPoints = new List<Vector3>();
         for (int j = segmentStart; j < segmentEnd; j++)
         {
@@ -212,7 +222,6 @@ public class Collisions : MonoBehaviour
     /// </summary>
     /// <param name="points">List of all recorded points</param>
     /// <param name="collider">BetterPhysics Collider of any type</param>
-    /// <param name="multithread">Indicates if the function should run as multithreaded or not.</param>
     /// <param name="collisionFound">Callback which gets sent index of affected point(s).</param>
     /// <param name="detectionMode">Indicates which detection mode should be used.</param>
     /// <returns>Boolean of whether any points from the list collides with the collider.</returns>
@@ -258,6 +267,27 @@ public class Collisions : MonoBehaviour
 
         Debug.Log(inVolume);
         return inVolume;
+    }
+
+    /// <summary>
+    /// Calculater whether any of the colliders from the colliders list collides with any of the points from the points list.
+    /// </summary>
+    /// <param name="points">List of all points</param>
+    /// <param name="colliders">List of colliders we want to check</param>
+    /// <param name="collisionFound">Callback when collision is detected</param>
+    /// <param name="detectionMode">Whether to deep search all colliding points or only the only one.</param>
+    /// <returns>Dictionary of pattern <colliderId, collides></returns>
+    public Dictionary<string, bool> CheckPointsCollision(List<Point> points, List<BetterPhysics.Collider> colliders, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
+    {
+        Dictionary<string, bool> collisionResults = new Dictionary<string, bool>();
+        //Same logic as CheckPointsCollision, but with a list of colliders
+        foreach (BetterPhysics.Collider collider in colliders)
+        {
+            bool collides = CheckPointsCollision(points, collider, (index) => Debug.Log(index + " is in."), detectionMode);
+            collisionResults.Add(collider.Id, collides);
+        }
+
+        return collisionResults;
     }
 
     private IEnumerator HandleJobAsync(List<Point> points, BetterPhysics.Collider collider, Action<bool> jobFinishedCallback, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
@@ -388,11 +418,28 @@ public class Collisions : MonoBehaviour
         jobFinishedCallback?.Invoke(inVolume);
     }
 
+    /// <summary>
+    /// Checks if collider collides with given points on multiple threads at once.
+    /// </summary>
+    /// <param name="points">List of all points</param>
+    /// <param name="collider">Collider we want to work with</param>
+    /// <param name="jobFinishedCallback">Lamdba function which is sent the "final" boolean of whether the colliders collides with the points or not.</param>
+    /// <param name="collisionFound">Lambda function of what to do when new collision(s) is/are detected.</param>
+    /// <param name="detectionMode">Whether to provide the collisionFound callback with deep search or only first collision.</param>
     public void CheckPointsCollisionAsync(List<Point> points, BetterPhysics.Collider collider, Action<bool> jobFinishedCallback, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
     {
         StartCoroutine(HandleJobAsync(points, collider, jobFinishedCallback, collisionFound, detectionMode));
     }
 
+    /// <summary>
+    /// Checks if colliders collide with given points on multiple threads at once. 
+    /// </summary>
+    /// <param name="points">List of all points</param>
+    /// <param name="colliders">List of colliders</param>
+    /// <param name="jobFinishedCallback">Lamdba function which is sent the "final" boolean of whether the colliders collides with the points or not.</param>
+    /// <param name="collisionFound">Lambda function of what to do when new collision(s) is/are detected.</param>
+    /// <param name="detectionMode">Whether to provide the collisionFound callback with deep search or only first collision.</param>
+    [Obsolete("Currently useless.")]
     public void CheckPointsCollisionAsync(List<Point> points, List<BetterPhysics.Collider> colliders, Action<bool> jobFinishedCallback, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
     {
         //TODO: This is currently fairly useless, as it is reporting two results not dependant on each other. This should be rather rewritten so one bool is called in the callback.
@@ -401,62 +448,9 @@ public class Collisions : MonoBehaviour
             CheckPointsCollisionAsync(points, col, jobFinishedCallback, collisionFound, detectionMode);
         }
     }
-
-
-    /// <summary>
-    /// Returns string,bool dictionary, which contains id of the collider and whether it is colliding or not.
-    /// </summary>
-    /// <param name="points">List of all points</param>
-    /// <param name="colliders">List of colliders</param>
-    /// <param name="multithread">Whether to run the function multithread or not.</param>
-    /// <param name="collisionFound">Callback which is sent the colliding point index.</param>
-    /// <param name="detectionMode">Whether to send only one (the first colliding) point through the callback, or all that are colliding.</param>
-    /// <returns></returns>
-    public Dictionary<string, bool> CheckPointsCollision(List<Point> points, List<BetterPhysics.Collider> colliders, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
-    {
-        Dictionary<string, bool> collisionResults = new Dictionary<string, bool>();
-        //Same logic as CheckPointsCollision, but with a list of colliders
-        foreach (BetterPhysics.Collider collider in colliders)
-        {
-            bool collides = CheckPointsCollision(points, collider, (index) => Debug.Log(index + " is in."), detectionMode);
-            collisionResults.Add(collider.Id, collides);
-        }
-
-        return collisionResults;
-    }
-
+    
     void Update()
     {
-        //Interaction with editor (usecase)
-        if (check)
-        {
-            check = false;
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-
-
-            CheckPointsCollisionAsync(pointsManager.Points, Colliders["spherical-1"], (b) =>
-            {
-                if (b)
-                {
-                    Debug.Log("Colliding");
-                }
-                else
-                {
-                    Debug.Log("Not Colliding");
-                }
-            }, (pointIndex) =>
-            {
-                Debug.Log("Point " + pointIndex + " is in the volume"); 
-                
-            }, DetectionMode.Simple);
-            
-            // Debug.Log(CheckPointsCollision(pointsManager.Points, Colliders["spherical-1"], (index) => Debug.Log(index + " is in."), DetectionMode.Simple));
-            sw.Stop();
-
-            Debug.Log("Finished checking " + pointsManager.Points.Count + " points in " + sw.ElapsedMilliseconds + " ms");
-        }
-
         //Update the collider position => this doesn't need to be in Update(), but it could be at the place you move the collider from.
         BetterPhysics.Collider col;
         bool hasCollider = Colliders.TryGetValue("cubic-1", out col);

@@ -28,13 +28,23 @@ public class MyCollisions : MonoBehaviour
         {
             check = false;
 
-            List<Collider> collidersToCheck = new List<Collider>() { collisions.Colliders["můjCollider"], collisions.Colliders["můjCollider2"] };
-            Dictionary<string, bool> colliderResults = collisions.CheckPointsCollision(pointsManager.Points, collidersToCheck);
-
-            foreach (var result in colliderResults)
+            // List<Collider> collidersToCheck = new List<Collider>() { collisions.Colliders["můjCollider"], collisions.Colliders["můjCollider2"] };
+            // Dictionary<string, bool> colliderResults = collisions.CheckPointsCollision(pointsManager.Points, collidersToCheck);
+            //
+            // foreach (var result in colliderResults)
+            // {
+            //     Debug.Log(result.Key + ": " + result.Value);
+            // }
+            
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            collisions.CheckPointsCollisionAsync(pointsManager.Points, collisions.Colliders["spherical-1"], (collides) =>
             {
-                Debug.Log(result.Key + ": " + result.Value);
-            }
+                string collisionStatus = collides ? "collides" : "does not collide";
+                Debug.Log("můjCollider " + collisionStatus);
+            }, detectionMode: DetectionMode.Enhanced);
+            sw.Stop();
+            Debug.Log("Async: " + sw.ElapsedMilliseconds+" ms");
         }
     }
 }
