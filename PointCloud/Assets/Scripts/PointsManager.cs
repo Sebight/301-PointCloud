@@ -1,10 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
-using System.IO;
-using TMPro;
-using UnityEngine.UI;
 
 public class PointsManager : MonoBehaviour
 {
@@ -23,6 +19,7 @@ public class PointsManager : MonoBehaviour
         
         TextAsset textFile = Resources.Load<TextAsset>("pointsList");
         Points = JsonConvert.DeserializeObject<List<Point>>(textFile.text);
+        
         for (int i = 0; i < Points.Count; i++)
         {
             points[i].position = new Vector3(points[i].x, points[i].y, points[i].z);

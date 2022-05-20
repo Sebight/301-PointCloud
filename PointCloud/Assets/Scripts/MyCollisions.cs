@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using BP;
 using UnityEngine;
 using Collider = BP.BetterPhysics.Collider;
@@ -35,16 +32,16 @@ public class MyCollisions : MonoBehaviour
             // {
             //     Debug.Log(result.Key + ": " + result.Value);
             // }
-            
+            string id = "cubic-1";
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            collisions.CheckPointsCollisionAsync(pointsManager.Points, collisions.Colliders["spherical-1"], (collides) =>
+            collisions.CheckPointsCollisionAsync(pointsManager.Points, collisions.Colliders[id], (collides) =>
             {
                 string collisionStatus = collides ? "collides" : "does not collide";
-                Debug.Log("můjCollider " + collisionStatus);
+                Debug.Log($"{id} " + collisionStatus);
             }, detectionMode: DetectionMode.Enhanced);
             sw.Stop();
-            Debug.Log("Async: " + sw.ElapsedMilliseconds+" ms");
+            Debug.Log("Checking done. Took: " + sw.ElapsedMilliseconds+" ms");
         }
     }
 }
