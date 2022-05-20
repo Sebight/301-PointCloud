@@ -2,14 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Unity.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 using Unity.Jobs;
-using Unity.VisualScripting;
 using Debug = UnityEngine.Debug;
 using BP;
 
@@ -42,7 +37,7 @@ public struct CubicJob : IJob, JobHelper.IJobDisposable
 }
 
 
-public struct SphericalJob : IJob
+public struct SphericalJob : IJob, JobHelper.IJobDisposable
 {
     public NativeArray<Vector3> points;
     public Vector3 volumeCenter;
@@ -57,6 +52,12 @@ public struct SphericalJob : IJob
             bool isIn = physics.IsPointInVolume(points[i], volumeCenter, radius);
             result[i] = isIn;
         }
+    }
+
+    public void OnDispose()
+    {
+        points.Dispose();
+        result.Dispose();
     }
 }
 
@@ -145,7 +146,10 @@ public class Collisions : MonoBehaviour
 
         //Register colliders
         RegisterCollider("cubic-1", new BetterPhysics.CubicCollider(exampleOrigin, exampleSize, rotateBy, "cubic-1"));
-        RegisterCollider("spherical-1", new BetterPhysics.SphericalCollider(new Vector3(0, 0, 0), 5f, "spherical-1"));
+        RegisterCollider("spherical-1", new BetterPhysics.SphericalCollider(new Vector3(100, 0, 0), 5f, "spherical-1"));
+
+        //Prepare the worker threads => run CheckPointsCollisionAsnyc once.
+        CheckPointsCollisionAsync(pointsManager.Points, new List<BetterPhysics.Collider>() { Colliders["cubic-1"], Colliders["spherical-1"] }, (b) => { });
     }
 
     #region Visualization
@@ -212,7 +216,7 @@ public class Collisions : MonoBehaviour
     /// <param name="collisionFound">Callback which gets sent index of affected point(s).</param>
     /// <param name="detectionMode">Indicates which detection mode should be used.</param>
     /// <returns>Boolean of whether any points from the list collides with the collider.</returns>
-    public bool CheckPointsCollision(List<Point> points, BetterPhysics.Collider collider, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple, Func<bool, bool> jobFinishedCallback = null)
+    public bool CheckPointsCollision(List<Point> points, BetterPhysics.Collider collider, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
     {
         //* This can be messy to read at first, but when you understand the core of this function, it's pretty easy to understand.
         //* The idea is to check if the collider collides with any of the points. This is already implemented with multithreading, so it's pretty fast (but messy).
@@ -225,7 +229,7 @@ public class Collisions : MonoBehaviour
         {
             if (collider.GetType() == typeof(BetterPhysics.SphericalCollider))
             {
-                BetterPhysics.SphericalCollider sphere = (BetterPhysics.SphericalCollider) collider;
+                BetterPhysics.SphericalCollider sphere = (BetterPhysics.SphericalCollider)collider;
                 if (physics.IsPointInVolume(points[i].position, sphere.Origin, sphere.Radius))
                 {
                     inVolume = true;
@@ -234,7 +238,7 @@ public class Collisions : MonoBehaviour
             }
             else if (collider.GetType() == typeof(BetterPhysics.CubicCollider))
             {
-                BetterPhysics.CubicCollider cube = (BetterPhysics.CubicCollider) collider;
+                BetterPhysics.CubicCollider cube = (BetterPhysics.CubicCollider)collider;
                 if (physics.IsPointInVolume(points[i].position, cube.Size, cube.Rotation, exampleOrigin))
                 {
                     inVolume = true;
@@ -256,13 +260,10 @@ public class Collisions : MonoBehaviour
         return inVolume;
     }
 
-    public bool CheckPointsCollisionAsync(List<Point> points, BetterPhysics.Collider collider, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple, Action<bool> jobFinishedCallback = null)
+    private IEnumerator HandleJobAsync(List<Point> points, BetterPhysics.Collider collider, Action<bool> jobFinishedCallback, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
     {
         bool inVolume = false;
         List<int> affectedPoints = new List<int>();
-
-        //TODO: Split this into some sort of sections  ¯\_(ツ)_/¯.
-
         //How many points fit into one job
         int jobBuffer = 500;
 
@@ -271,7 +272,12 @@ public class Collisions : MonoBehaviour
         //Create nativearray to store all the jobHandles, with the appropriate size.
         NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(points.Count / jobBuffer + 10, Allocator.Temp);
 
+        Dictionary<int, bool> resultsWithIndices = new Dictionary<int, bool>();
+
         int jobIndex = 0;
+
+        int jobsCompleted = 0;
+
 
         for (int i = 0; i < points.Count; i += jobBuffer)
         {
@@ -286,7 +292,8 @@ public class Collisions : MonoBehaviour
 
             if (collider.GetType() == typeof(BetterPhysics.CubicCollider))
             {
-                BetterPhysics.CubicCollider col = (BetterPhysics.CubicCollider) collider;
+                //* Cubical collider
+                BetterPhysics.CubicCollider col = (BetterPhysics.CubicCollider)collider;
 
                 CubicJob job = new CubicJob();
                 job.points = new NativeArray<Vector3>(tempPoints.ToArray(), Allocator.TempJob);
@@ -298,53 +305,19 @@ public class Collisions : MonoBehaviour
 
                 JobHelper.JobExecution execution = JobHelper.AddScheduledJob(job, job.Schedule(), (jobExecutor) =>
                 {
-                    // Debug.LogFormat("Job has completed in {0}s and {1} frames!", jobExecutor.Duration, jobExecutor.FramesTaken);
-
-                    // Result is available. LateUpdate() context.
-
-                    if (detectionMode == DetectionMode.Simple)
+                    for (int j = 0; j < _result.Length; j++)
                     {
-                        int pointIndex = 0;
-                        foreach (bool pointResult in _result)
-                        {
-                            // Debug.Log(pointResult + " - " + (segmentStart + pointIndex));
-                            if (pointResult)
-                            {
-                                inVolume = true;
-                                //Convert the local pointIndex into the original point index
-                                int originalIndex = segmentStart + pointIndex;
-                                //Anything you want to do with the colliding point
-                                if (!inVolume) collisionFound?.Invoke(originalIndex);
-                                break;
-                            }
-
-                            pointIndex++;
-                        }
-                    }
-                    else if (detectionMode == DetectionMode.Enhanced)
-                    {
-                        //Gathers all the points that are inside the volume
-                        int pointIndex = 0;
-                        foreach (bool pointResult in _result)
-                        {
-                            if (pointResult)
-                            {
-                                affectedPoints.Add(segmentStart + pointIndex);
-                                if (!inVolume) inVolume = true;
-                            }
-
-                            pointIndex++;
-                        }
+                        resultsWithIndices.Add(segmentStart + j, _result[j]);
                     }
 
+                    jobsCompleted++;
                     jobExecutor.Dispose();
-                    jobFinishedCallback?.Invoke(inVolume);
                 });
-
             }
             else if (collider.GetType() == typeof(BetterPhysics.SphericalCollider))
             {
-                BetterPhysics.SphericalCollider col = (BetterPhysics.SphericalCollider) collider;
+                //* SphericalCollider
+                BetterPhysics.SphericalCollider col = (BetterPhysics.SphericalCollider)collider;
 
                 SphericalJob job = new SphericalJob();
                 job.points = new NativeArray<Vector3>(tempPoints.ToArray(), Allocator.TempJob);
@@ -352,9 +325,16 @@ public class Collisions : MonoBehaviour
                 job.radius = col.Radius;
                 job.result = _result;
 
-                JobHandle handle = job.Schedule();
-                handle.Complete();
-                job.points.Dispose();
+                JobHelper.JobExecution execution = JobHelper.AddScheduledJob(job, job.Schedule(), (jobExecutor) =>
+                {
+                    for (int j = 0; j < _result.Length; j++)
+                    {
+                        resultsWithIndices.Add(segmentStart + j, _result[j]);
+                    }
+
+                    jobsCompleted++;
+                    jobExecutor.Dispose();
+                });
             }
 
             jobIndex++;
@@ -363,9 +343,63 @@ public class Collisions : MonoBehaviour
         JobHandle.ScheduleBatchedJobs();
         JobHandle.CompleteAll(jobHandles);
 
-        jobHandles.Dispose();
+        yield return new WaitWhile(() => jobsCompleted < jobIndex);
+        //* Working with results
+        if (detectionMode == DetectionMode.Simple)
+        {
+            int pointIndex = 0;
+            foreach (KeyValuePair<int, bool> pointResult in resultsWithIndices)
+            {
+                // Debug.Log(pointResult + " - " + (segmentStart + pointIndex));
+                if (pointResult.Value)
+                {
+                    inVolume = true;
+                    //Convert the local pointIndex into the original point index
+                    int originalIndex = pointResult.Key;
+                    //Anything you want to do with the colliding point
+                    collisionFound?.Invoke(originalIndex);
+                    break;
+                }
 
-        return false;
+                pointIndex++;
+            }
+        }
+        else if (detectionMode == DetectionMode.Enhanced)
+        {
+            //Gathers all the points that are inside the volume
+            int pointIndex = 0;
+            foreach (KeyValuePair<int, bool> pointResult in resultsWithIndices)
+            {
+                if (pointResult.Value)
+                {
+                    affectedPoints.Add(pointResult.Key);
+                    if (!inVolume) inVolume = true;
+                }
+
+                pointIndex++;
+            }
+
+            foreach (int affectedIndex in affectedPoints)
+            {
+                collisionFound?.Invoke(affectedIndex);
+            }
+        }
+
+        jobFinishedCallback?.Invoke(inVolume);
+    }
+
+    public void CheckPointsCollisionAsync(List<Point> points, BetterPhysics.Collider collider, Action<bool> jobFinishedCallback, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
+    {
+        StartCoroutine(HandleJobAsync(points, collider, jobFinishedCallback, collisionFound, detectionMode));
+    }
+
+    public void CheckPointsCollisionAsync(List<Point> points, List<BetterPhysics.Collider> colliders, Action<bool> jobFinishedCallback, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
+    {
+        //TODO: This is currently fairly useless, as it is reporting two results not dependant on each other. This should be rather rewritten so one bool is called in the callback.
+        foreach (BetterPhysics.Collider col in colliders)
+        {
+            CheckPointsCollisionAsync(points, col, jobFinishedCallback, collisionFound, detectionMode);
+        }
     }
 
 
@@ -401,9 +435,8 @@ public class Collisions : MonoBehaviour
             sw.Start();
 
 
-            Debug.Log(CheckPointsCollisionAsync(pointsManager.Points, Colliders["cubic-1"], (pointIndex) => { Debug.Log("Point " + pointIndex + " is in the volume"); }, DetectionMode.Simple, (b) =>
+            CheckPointsCollisionAsync(pointsManager.Points, Colliders["spherical-1"], (b) =>
             {
-                //TODO: This should get all points result rather than just one. This is very rough, but working example.
                 if (b)
                 {
                     Debug.Log("Colliding");
@@ -412,7 +445,13 @@ public class Collisions : MonoBehaviour
                 {
                     Debug.Log("Not Colliding");
                 }
-            }));
+            }, (pointIndex) =>
+            {
+                Debug.Log("Point " + pointIndex + " is in the volume"); 
+                
+            }, DetectionMode.Simple);
+            
+            // Debug.Log(CheckPointsCollision(pointsManager.Points, Colliders["spherical-1"], (index) => Debug.Log(index + " is in."), DetectionMode.Simple));
             sw.Stop();
 
             Debug.Log("Finished checking " + pointsManager.Points.Count + " points in " + sw.ElapsedMilliseconds + " ms");
@@ -423,7 +462,7 @@ public class Collisions : MonoBehaviour
         bool hasCollider = Colliders.TryGetValue("cubic-1", out col);
         if (hasCollider)
         {
-            BetterPhysics.CubicCollider c = (BetterPhysics.CubicCollider) col;
+            BetterPhysics.CubicCollider c = (BetterPhysics.CubicCollider)col;
             //exampleOrigin is lower left corner => convert it to center
             c.Origin = new Vector3(exampleOrigin.x + c.Size.x / 2, exampleOrigin.y + c.Size.y / 2, exampleOrigin.z + c.Size.z / 2);
             c.Size = exampleSize;
