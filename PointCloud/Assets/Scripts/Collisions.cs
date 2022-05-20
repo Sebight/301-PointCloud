@@ -75,70 +75,12 @@ public class Collisions : MonoBehaviour
     [SerializeField] private Vector3 centerOfVolume;
     [SerializeField] private Vector3 newCenterOfVolume;
 
-    //Variables used for visualization, can be deleted.
-    private List<Vector3> positions;
-    private List<GameObject> gos = new List<GameObject>();
-
-
     public PointsManager pointsManager;
-
-    #region Visualization
-
-    public void DrawVolume(List<Vector3> positions)
-    {
-        if (gos.Count == 0)
-        {
-            foreach (var position in positions)
-            {
-                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                cube.transform.position = position;
-                if (position == exampleOrigin) cube.GetComponent<MeshRenderer>().material.color = Color.yellow;
-                gos.Add(cube);
-            }
-        }
-
-        for (int i = 0; i < gos.Count; i++)
-        {
-            gos[i].transform.position = positions[i];
-        }
-    }
-
-    #endregion
 
     public readonly Dictionary<string, BetterPhysics.Collider> Colliders = new Dictionary<string, BetterPhysics.Collider>();
 
     void Start()
     {
-        #region Visualization
-
-        float startX = exampleOrigin.x;
-        float endX = exampleOrigin.x + exampleSize.x;
-
-        float startY = exampleOrigin.y;
-        float endY = exampleOrigin.y + exampleSize.y;
-
-        float startZ = exampleOrigin.z;
-        float endZ = exampleOrigin.z + exampleSize.z;
-
-        positions = new List<Vector3>()
-        {
-            new Vector3(startX, startY, startZ), new Vector3(endX, startY, startZ), new Vector3(startX, endY, startZ),
-            new Vector3(startX, startY, endZ), new Vector3(endX, endY, startZ), new Vector3(startX, endY, endZ),
-            new Vector3(endX, endY, endZ), new Vector3(endX, startY, endZ)
-        };
-        centerOfVolume = new Vector3((startX + endX) / 2, (startY + endY) / 2, (startZ + endZ) / 2);
-
-        for (int i = 0; i < positions.Count; i++)
-        {
-            Vector3 pos = positions[i];
-            pos = Quaternion.Euler(rotateBy) * (pos - centerOfVolume) + centerOfVolume;
-            positions[i] = pos;
-        }
-
-        exampleOrigin = positions[0];
-        DrawVolume(positions);
-
-        #endregion
 
         //Register colliders
         RegisterCollider("cubic-1", new BetterPhysics.CubicCollider(exampleOrigin, exampleSize, rotateBy, "cubic-1"));
@@ -148,40 +90,8 @@ public class Collisions : MonoBehaviour
         CheckPointsCollisionAsync(pointsManager.Points, new List<BetterPhysics.Collider>() { Colliders["cubic-1"], Colliders["spherical-1"] }, (b) => { });
     }
 
-    #region Visualization
 
-    private void RebuildVolume()
-    {
-        float startX = exampleOrigin.x;
-        float endX = exampleOrigin.x + exampleSize.x;
-
-        float startY = exampleOrigin.y;
-        float endY = exampleOrigin.y + exampleSize.y;
-
-        float startZ = exampleOrigin.z;
-        float endZ = exampleOrigin.z + exampleSize.z;
-
-        positions = new List<Vector3>()
-        {
-            new Vector3(startX, startY, startZ), new Vector3(endX, startY, startZ), new Vector3(startX, endY, startZ),
-            new Vector3(startX, startY, endZ), new Vector3(endX, endY, startZ), new Vector3(startX, endY, endZ),
-            new Vector3(endX, endY, endZ), new Vector3(endX, startY, endZ)
-        };
-        centerOfVolume = new Vector3((startX + endX) / 2, (startY + endY) / 2, (startZ + endZ) / 2);
-
-        for (int i = 0; i < positions.Count; i++)
-        {
-            Vector3 pos = positions[i];
-            pos = Quaternion.Euler(rotateBy) * (pos - centerOfVolume) + centerOfVolume;
-            positions[i] = pos;
-        }
-
-        // exampleOrigin = positions[0];
-        DrawVolume(positions);
-    }
-
-    #endregion
-
+    //Testing
     public void Check() => check = true;
 
     /// <summary>
@@ -442,13 +352,13 @@ public class Collisions : MonoBehaviour
     [Obsolete("Currently useless.")]
     public void CheckPointsCollisionAsync(List<Point> points, List<BetterPhysics.Collider> colliders, Action<bool> jobFinishedCallback, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
     {
-        //TODO: This is currently fairly useless, as it is reporting two results not dependant on each other. This should be rather rewritten so one bool is called in the callback.
+        //TODO: This is currently fairly useless, as it is reporting two results not dependant on each other. This should be rather rewritten so one bool is sent in the callback.
         foreach (BetterPhysics.Collider col in colliders)
         {
             CheckPointsCollisionAsync(points, col, jobFinishedCallback, collisionFound, detectionMode);
         }
     }
-    
+
     void Update()
     {
         //Update the collider position => this doesn't need to be in Update(), but it could be at the place you move the collider from.
@@ -463,7 +373,5 @@ public class Collisions : MonoBehaviour
             c.Rotation = rotateBy;
         }
 
-        //Visualization
-        RebuildVolume();
     }
 }
