@@ -6,8 +6,8 @@ namespace BP
     //"BetterPhysics" is a "wrong" name, it actually contains WorserPhysics then anything else
     //Perhaps more fitting names are: "SimplePhysics", "PointPhysics", "VolumeHelper", "VolumePhysics"..
 
-    //Sub classes as "Collider" and their derivatives might actually benefit to be in the same scope as the parent class
-    //This would help the implementation a lot since it now has to get the static type via writing the parent class first
+    //* Sub classes as "Collider" and their derivatives might actually benefit to be in the same scope as the parent class
+    //* This would help the implementation a lot since it now has to get the static type via writing the parent class first
 
     //IsInVolume has a second override and which changes has different definition fo the "volume". 
     //Since we tend to implement other shapes, the name should be more obvious. I promose to separate the methods with different names:
@@ -21,47 +21,47 @@ namespace BP
     //Both options would be more "clean"
 
     [Serializable]
+    public class PointCollider
+    {
+        public string Id;
+
+        public PointCollider(string id)
+        {
+            Id = id;
+        }
+    }
+    
+    [Serializable]
+    public class PointCubicCollider : PointCollider
+    {
+        public Vector3 Origin;
+        public Vector3 Size;
+        public Vector3 Rotation;
+
+        public PointCubicCollider(Vector3 origin, Vector3 size, Vector3 rotation, string id) : base(id)
+        {
+            Origin = origin;
+            Size = size;
+            Rotation = rotation;
+        }
+    }
+
+    [Serializable]
+    public class PointSphericalCollider : PointCollider
+    {
+        public Vector3 Origin;
+        public float Radius;
+
+        public PointSphericalCollider(Vector3 origin, float radius, string id) : base(id)
+        {
+            Origin = origin;
+            Radius = radius;
+        }
+    }
+
+    [Serializable]
     public class BetterPhysics
     {
-        [Serializable]
-        public class Collider
-        {
-            public string Id;
-
-            public Collider(string id)
-            {
-                Id = id;
-            }
-        }
-
-        [Serializable]
-        public class CubicCollider : Collider
-        {
-            public Vector3 Origin;
-            public Vector3 Size;
-            public Vector3 Rotation;
-
-            public CubicCollider(Vector3 origin, Vector3 size, Vector3 rotation, string id) : base(id)
-            {
-                Origin = origin;
-                Size = size;
-                Rotation = rotation;
-            }
-        }
-
-        [Serializable]
-        public class SphericalCollider : Collider
-        {
-            public Vector3 Origin;
-            public float Radius;
-
-            public SphericalCollider(Vector3 origin, float radius, string id) : base(id)
-            {
-                Origin = origin;
-                Radius = radius;
-            }
-        }
-
         /// <summary>
         /// Calculates if the point is within the rectangular volume defined from the parameters.
         /// </summary>
@@ -70,7 +70,7 @@ namespace BP
         /// <param name="rotation">Rotation of volume</param>
         /// <param name="volumeCenter">Center of volume</param>
         /// <returns>Boolean of if point is or is not in constructed volume.</returns>
-        public bool IsPointInVolume(Vector3 point, Vector3 volumeDimensions, Vector3 rotation, Vector3 volumeCenter)
+        public static bool IsPointInVolume(Vector3 point, Vector3 volumeDimensions, Vector3 rotation, Vector3 volumeCenter)
         {
             // Calculate the original direction
             Vector3 originalDirection = point - volumeCenter;
@@ -112,7 +112,7 @@ namespace BP
         /// <param name="volumeCenter">Volume center in world-space.</param>
         /// <param name="radius">Distance from center to border of sphere.</param>
         /// <returns>Boolean of whether point is within volume or not.</returns>
-        public bool IsPointInVolume(Vector3 point, Vector3 volumeCenter, float radius)
+        public static bool IsPointInVolume(Vector3 point, Vector3 volumeCenter, float radius)
         {
             float centerToPointDistance = Vector3.Distance(point, volumeCenter);
             return (centerToPointDistance <= radius);

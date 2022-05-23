@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Collections;
 using UnityEngine;
 using Unity.Jobs;
@@ -17,10 +18,9 @@ public struct CubicJob : IJob, JobHelper.IJobDisposable
 
     public void Execute()
     {
-        BetterPhysics physics = new BetterPhysics();
         for (int i = 0; i < Points.Length; i++)
         {
-            bool isIn = physics.IsPointInVolume(Points[i], VolumeDimensions, Rotation, VolumeCenter);
+            bool isIn = BetterPhysics.IsPointInVolume(Points[i], VolumeDimensions, Rotation, VolumeCenter);
             Result[i] = isIn;
         }
     }
@@ -42,10 +42,9 @@ public struct SphericalJob : IJob, JobHelper.IJobDisposable
 
     public void Execute()
     {
-        BetterPhysics physics = new BetterPhysics();
         for (int i = 0; i < Points.Length; i++)
         {
-            bool isIn = physics.IsPointInVolume(Points[i], VolumeCenter, Radius);
+            bool isIn = BetterPhysics.IsPointInVolume(Points[i], VolumeCenter, Radius);
             Result[i] = isIn;
         }
     }
@@ -65,29 +64,26 @@ public enum DetectionMode
 
 public class Collisions : MonoBehaviour
 {
-    //Variables used mostly for testing
-    public bool check = false;
-
     [SerializeField] private Vector3 exampleOrigin;
     [SerializeField] private Vector3 exampleSize;
     [SerializeField] private Vector3 rotateBy;
 
     public PointsManager pointsManager;
 
-    public readonly Dictionary<string, BetterPhysics.Collider> Colliders = new Dictionary<string, BetterPhysics.Collider>();
+    public readonly Dictionary<string, PointCollider> Colliders = new();
 
     void Start()
     {
         //REFACTOR: same comments as in MyCollisions.cs
 
         //Register colliders
-        RegisterCollider(new BetterPhysics.CubicCollider(exampleOrigin, exampleSize, rotateBy, "cubic-1"));
-        RegisterCollider(new BetterPhysics.SphericalCollider(new Vector3(100, 0, 0), 5f, "spherical-1"));
+        RegisterCollider(new PointCubicCollider(exampleOrigin, exampleSize, rotateBy, "cubic-1"));
+        RegisterCollider(new PointSphericalCollider(new Vector3(100, 0, 0), 5f, "spherical-1"));
 
         //Why is this depracated? What is the reason?
 
         //Prepare the worker threads => run CheckPointsCollisionAsnyc once.
-        List<BetterPhysics.Collider> colliders = new() 
+        List<PointCollider> colliders = new() 
         {
             Colliders["cubic-1"], 
             Colliders["spherical-1"] 
@@ -102,12 +98,11 @@ public class Collisions : MonoBehaviour
     /// <param name="id">Unique indetification of newly created collider.</param>
     /// <param name="collider">Collider object</param>
     /// <returns>Newly created collider.</returns>
-    public BetterPhysics.Collider RegisterCollider(BetterPhysics.Collider collider)
+    public void RegisterCollider(PointCollider collider)
     {
         Colliders.Add(collider.Id, collider);
-        return collider;
     }
-    public void RegisterCollider(params BetterPhysics.Collider[] colliders)
+    public void RegisterCollider(params PointCollider[] colliders)
     {
         foreach (var x in colliders)
             RegisterCollider(x);
@@ -142,7 +137,7 @@ public class Collisions : MonoBehaviour
     /// <param name="collisionFound">Callback which gets sent index of affected point(s).</param>
     /// <param name="detectionMode">Indicates which detection mode should be used.</param>
     /// <returns>Boolean of whether any points from the list collides with the collider.</returns>
-    public bool CheckPointsCollision(List<Point> points, BetterPhysics.Collider collider, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
+    public bool CheckPointsCollision(List<Point> points, PointCollider collider, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
     {
         //* This can be messy to read at first, but when you understand the core of this function, it's pretty easy to understand.
         //* The idea is to check if the collider collides with any of the points. This is already implemented with multithreading, so it's pretty fast (but messy).
@@ -153,19 +148,19 @@ public class Collisions : MonoBehaviour
         BetterPhysics physics = new BetterPhysics();
         for (int i = 0; i < points.Count; i++)
         {
-            if (collider.GetType() == typeof(BetterPhysics.SphericalCollider))
+            if (collider.GetType() == typeof(PointSphericalCollider))
             {
-                BetterPhysics.SphericalCollider sphere = (BetterPhysics.SphericalCollider)collider;
-                if (physics.IsPointInVolume(points[i].Position, sphere.Origin, sphere.Radius))
+                PointSphericalCollider sphere = (PointSphericalCollider)collider;
+                if (BetterPhysics.IsPointInVolume(points[i].Position, sphere.Origin, sphere.Radius))
                 {
                     inVolume = true;
                     break;
                 }
             }
-            else if (collider.GetType() == typeof(BetterPhysics.CubicCollider))
+            else if (collider.GetType() == typeof(PointCubicCollider))
             {
-                BetterPhysics.CubicCollider cube = (BetterPhysics.CubicCollider)collider;
-                if (physics.IsPointInVolume(points[i].Position, cube.Size, cube.Rotation, exampleOrigin))
+                PointCubicCollider cube = (PointCubicCollider)collider;
+                if (BetterPhysics.IsPointInVolume(points[i].Position, cube.Size, cube.Rotation, exampleOrigin))
                 {
                     inVolume = true;
                     break;
@@ -194,11 +189,11 @@ public class Collisions : MonoBehaviour
     /// <param name="collisionFound">Callback when collision is detected</param>
     /// <param name="detectionMode">Whether to deep search all colliding points or only the only one.</param>
     /// <returns>Dictionary of pattern <colliderId, collides></returns>
-    public Dictionary<string, bool> CheckPointsCollision(List<Point> points, List<BetterPhysics.Collider> colliders, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
+    public Dictionary<string, bool> CheckPointsCollision(List<Point> points, List<PointCollider> colliders, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
     {
         Dictionary<string, bool> collisionResults = new Dictionary<string, bool>();
         //Same logic as CheckPointsCollision, but with a list of colliders
-        foreach (BetterPhysics.Collider collider in colliders)
+        foreach (PointCollider collider in colliders)
         {
             bool collides = CheckPointsCollision(points, collider, (index) => Debug.Log(index + " is in."), detectionMode);
             collisionResults.Add(collider.Id, collides);
@@ -207,7 +202,7 @@ public class Collisions : MonoBehaviour
         return collisionResults;
     }
 
-    private IEnumerator HandleJobAsync(List<Point> points, BetterPhysics.Collider collider, Action<bool> jobFinishedCallback, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
+    private IEnumerator HandleJobAsync(List<Point> points, PointCollider collider, Action<bool> jobFinishedCallback, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
     {
         bool inVolume = false;
         List<int> affectedPoints = new List<int>();
@@ -237,10 +232,10 @@ public class Collisions : MonoBehaviour
             NativeArray<bool> _result = new NativeArray<bool>(jobBuffer, Allocator.TempJob);
 
 
-            if (collider.GetType() == typeof(BetterPhysics.CubicCollider))
+            if (collider.GetType() == typeof(PointCubicCollider))
             {
                 //* Cubical collider
-                BetterPhysics.CubicCollider col = (BetterPhysics.CubicCollider)collider;
+                PointCubicCollider col = (PointCubicCollider)collider;
 
                 CubicJob job = new CubicJob();
                 job.Points = new NativeArray<Vector3>(tempPoints.ToArray(), Allocator.TempJob);
@@ -261,10 +256,10 @@ public class Collisions : MonoBehaviour
                     jobExecutor.Dispose();
                 });
             }
-            else if (collider.GetType() == typeof(BetterPhysics.SphericalCollider))
+            else if (collider.GetType() == typeof(PointSphericalCollider))
             {
-                //* SphericalCollider
-                BetterPhysics.SphericalCollider col = (BetterPhysics.SphericalCollider)collider;
+                // *PointSphericalCollider
+                PointSphericalCollider col = (PointSphericalCollider)collider;
 
                 SphericalJob job = new SphericalJob();
                 job.Points = new NativeArray<Vector3>(tempPoints.ToArray(), Allocator.TempJob);
@@ -342,7 +337,7 @@ public class Collisions : MonoBehaviour
     /// <param name="jobFinishedCallback">Lamdba function which is sent the "final" boolean of whether the colliders collides with the points or not.</param>
     /// <param name="collisionFound">Lambda function of what to do when new collision(s) is/are detected.</param>
     /// <param name="detectionMode">Whether to provide the collisionFound callback with deep search or only first collision.</param>
-    public void CheckPointsCollisionAsync(List<Point> points, BetterPhysics.Collider collider, Action<bool> jobFinishedCallback, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
+    public void CheckPointsCollisionAsync(List<Point> points, PointCollider collider, Action<bool> jobFinishedCallback, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
     {
         StartCoroutine(HandleJobAsync(points, collider, jobFinishedCallback, collisionFound, detectionMode));
     }
@@ -355,13 +350,34 @@ public class Collisions : MonoBehaviour
     /// <param name="jobFinishedCallback">Lamdba function which is sent the "final" boolean of whether the colliders collides with the points or not.</param>
     /// <param name="collisionFound">Lambda function of what to do when new collision(s) is/are detected.</param>
     /// <param name="detectionMode">Whether to provide the collisionFound callback with deep search or only first collision.</param>
-    [Obsolete("Currently useless.")]
-    public void CheckPointsCollisionAsync(List<Point> points, List<BetterPhysics.Collider> colliders, Action<bool> jobFinishedCallback, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
+    // [Obsolete("Currently useless.")]
+    public void CheckPointsCollisionAsync(List<Point> points, List<PointCollider> colliders, Action<bool> jobFinishedCallback, Action<int> collisionFound = null, DetectionMode detectionMode = DetectionMode.Simple)
     {
         //TODO: This is currently fairly useless, as it is reporting two results not dependant on each other. This should be rather rewritten so one bool is sent in the callback.
-        foreach (BetterPhysics.Collider col in colliders)
+        bool resolved = false;
+
+        int[] flags = new int[colliders.Count];
+        for(int i = 0 ;i < colliders.Count ; i++)
         {
-            CheckPointsCollisionAsync(points, col, jobFinishedCallback, collisionFound, detectionMode);
+            var col = colliders[i];
+            int index = i;
+            CheckPointsCollisionAsync(points, col, (state) => OnFinish(index, state), collisionFound, detectionMode);
+        }
+
+        void OnFinish(int jobIndex, bool state)
+        {
+            if(resolved)
+                return;
+
+            flags[jobIndex] = state ? 2 : 1;
+
+            if(flags.Any(x => x == 2))
+            {
+                jobFinishedCallback(true);
+                resolved = true;
+            }
+            else if(flags.All(x => x != 0))
+                jobFinishedCallback(false);
         }
     }
 
@@ -370,25 +386,25 @@ public class Collisions : MonoBehaviour
     /// </summary>
     /// <param name="id">id of collider we want to update.</param>
     /// <param name="colliderData">Collider object which contains data we want to set.</param>
-    public void UpdateColliderData(string id, BetterPhysics.Collider colliderData)
+    public void UpdateColliderData(string id, PointCollider colliderData)
     {
-        BetterPhysics.Collider col;
+        PointCollider col;
         bool hasCollider = Colliders.TryGetValue(id, out col);
         if (hasCollider)
         {
-            if (col.GetType() == typeof(BetterPhysics.CubicCollider))
+            if (col.GetType() == typeof(PointCubicCollider))
             {
-                BetterPhysics.CubicCollider cubicCol = (BetterPhysics.CubicCollider)col;
-                BetterPhysics.CubicCollider colliderDataConverted = (BetterPhysics.CubicCollider)colliderData;
+                PointCubicCollider cubicCol = (PointCubicCollider)col;
+                PointCubicCollider colliderDataConverted = (PointCubicCollider)colliderData;
                 cubicCol.Origin = colliderDataConverted.Origin;
                 cubicCol.Size = colliderDataConverted.Size;
                 cubicCol.Rotation = colliderDataConverted.Rotation;
                 
                 Colliders[id] = cubicCol;
-            } else if (col.GetType() == typeof(BetterPhysics.SphericalCollider))
+            } else if (col.GetType() == typeof(PointSphericalCollider))
             {
-                BetterPhysics.SphericalCollider sphericalCol = (BetterPhysics.SphericalCollider)col;
-                BetterPhysics.SphericalCollider colliderDataConverted = (BetterPhysics.SphericalCollider)colliderData;
+                PointSphericalCollider sphericalCol = (PointSphericalCollider)col;
+                PointSphericalCollider colliderDataConverted = (PointSphericalCollider)colliderData;
                 sphericalCol.Origin = colliderDataConverted.Origin;
                 sphericalCol.Radius = colliderDataConverted.Radius;
                 
@@ -400,6 +416,6 @@ public class Collisions : MonoBehaviour
     void Update()
     {
         //Update the collider position => this doesn't need to be in Update(), but it could be at the place you move the collider from.
-        UpdateColliderData("cubic-1", new BetterPhysics.CubicCollider(exampleOrigin, exampleSize, rotateBy, ""));
+        UpdateColliderData("cubic-1", new PointCubicCollider(exampleOrigin, exampleSize, rotateBy, ""));
     }
 }

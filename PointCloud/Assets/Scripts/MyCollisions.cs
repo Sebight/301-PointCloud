@@ -1,7 +1,7 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using BP;
 using UnityEngine;
-using Collider = BP.BetterPhysics.Collider; //Consider a different name. Perhaps one of these: "DataCollider", "SimpleCollider", "PointCollider", "Volume", "ARCollider" ... 
 using Debug = UnityEngine.Debug;
 
 public class MyCollisions : MonoBehaviour
@@ -13,15 +13,15 @@ public class MyCollisions : MonoBehaviour
     {
         //Duplicated human IDs is a bad practise
         //Having creation and registering as a separate methods AND a oneliner is bad pracise. Mainly, the "RegisterCollider" doesn't have to return the insance it registered.
-        var sphere = new BetterPhysics.SphericalCollider(new Vector3(0, 0, 0), 5f, "nejkulaťoulinkatější");
+        var sphere = new PointSphericalCollider(new Vector3(120, 0, 0), 5f, "kulatak");
         //Having another type called Collider may confuse other devs.
-        collisions.RegisterCollider(sphere);
+        // collisions.RegisterCollider(sphere);
 
-        var cube = new BetterPhysics.SphericalCollider(new Vector3(180, 180, 180), 5f, "krabičák");
-        collisions.RegisterCollider(cube);
+        var cube = new PointSphericalCollider(new Vector3(180, 180, 180), 5f, "krabičák");
+        // collisions.RegisterCollider(cube);
 
         //Perhaps more convinient would be to implement the registration like so:
-        //collisions.RegisterCollider(cube, sphere); //<== uncomment me
+        collisions.RegisterCollider(cube, sphere);
     }
 
     [ContextMenu("Mock - print out collision")]
@@ -40,11 +40,18 @@ public class MyCollisions : MonoBehaviour
         string id = "cubic-1";
         Stopwatch sw = new Stopwatch();
         sw.Start();
-        collisions.CheckPointsCollisionAsync(pointsManager.Points, collisions.Colliders[id], (collides) =>
+
+        List<PointCollider> colliders = new()
+        {
+            collisions.Colliders["kulatak"],
+            collisions.Colliders["krabičák"]
+        };
+        
+        collisions.CheckPointsCollisionAsync(pointsManager.Points, colliders, (collides) =>
         {
             string collisionStatus = collides ? "collides" : "does not collide";
             Debug.Log($"{id} " + collisionStatus);
-        }, detectionMode: DetectionMode.Enhanced);
+        }, detectionMode: DetectionMode.Simple);
         sw.Stop();
         Debug.Log("Checking done. Took: " + sw.ElapsedMilliseconds + " ms");
     }

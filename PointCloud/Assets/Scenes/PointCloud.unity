@@ -370,7 +370,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pointsManager: {fileID: 1285332262}
   collisions: {fileID: 1823653761}
-  check: 0
 --- !u!4 &106272775
 Transform:
   m_ObjectHideFlags: 0
@@ -2079,7 +2078,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1327520896
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2270,10 +2269,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9feeeb7305e950f4686abfdad5f5ca8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cube: {fileID: 861510442}
-  pointManager: {fileID: 1337481014}
+  Cube: {fileID: 861510442}
+  PointManager: {fileID: 1337481014}
   Points: []
-  slider: {fileID: 2099042308}
+  Slider: {fileID: 2099042308}
 --- !u!1001 &1381965167
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2661,7 +2660,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74fdb865dc4e9461b83f717b5f7128dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  check: 0
   exampleOrigin: {x: -10, y: -10, z: 0}
   exampleSize: {x: 20, y: 20, z: 20}
   rotateBy: {x: 0, y: 0, z: 0}
