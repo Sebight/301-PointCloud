@@ -35,7 +35,7 @@ public class CubeBehaviour : MonoBehaviour
         for (int i = 0; i < points.Count; ++i)
         {
 
-            if (IsPointInCollider(collider, points[i].position))
+            if (IsPointInCollider(collider, points[i].Position))
             {
                 // ParticleSystem.MainModule settings = points[i].go.GetComponent<ParticleSystem>().main;
                 // settings.startColor = new ParticleSystem.MinMaxGradient(Color.blue);

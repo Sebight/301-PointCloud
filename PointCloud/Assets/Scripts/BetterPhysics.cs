@@ -3,6 +3,23 @@ using UnityEngine;
 
 namespace BP
 {
+    //"BetterPhysics" is a "wrong" name, it actually contains WorserPhysics then anything else
+    //Perhaps more fitting names are: "SimplePhysics", "PointPhysics", "VolumeHelper", "VolumePhysics"..
+
+    //Sub classes as "Collider" and their derivatives might actually benefit to be in the same scope as the parent class
+    //This would help the implementation a lot since it now has to get the static type via writing the parent class first
+
+    //IsInVolume has a second override and which changes has different definition fo the "volume". 
+    //Since we tend to implement other shapes, the name should be more obvious. I promose to separate the methods with different names:
+    //"IsPointInCube", "IsPointInSphere"
+
+    //Last note, if we have a class for Collider definition we perhaps don't need a separate "BetterPhysics" to "host" the volume logic.
+    //It is not static although, it doesn't have any inner state
+
+    //BetterPhysics could be static and contain the implementation of the "IsPointInVolumeXYZ" concept
+    //OR the implementation could be directly in the Collider definition
+    //Both options would be more "clean"
+
     [Serializable]
     public class BetterPhysics
     {

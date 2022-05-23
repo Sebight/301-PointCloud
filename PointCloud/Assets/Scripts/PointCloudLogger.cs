@@ -5,45 +5,48 @@ using UnityEngine.XR.ARFoundation;
 using Newtonsoft.Json;
 using System.IO;
 using UnityEngine.UI;
+using UnityEngine.Serialization;
 
 [System.Serializable]
-public class Point
+public class Point //REFACTOR: change class to record or struct - can be more easily cached => CPU time is reduced
 {
-    public float x;
-    public float y;
-    public float z;
+    public float X;
+    public float Y;
+    public float Z;
 
-    public Vector3 position;
+    public Vector3 Position;
 
-    public float confidence;
+    public float Confidence;
 
-    public Point(Vector3 pos, float _confidence)
+    public Point(Vector3 pos, float confidence)
     {
-        position = pos;
-        x = pos.x;
-        y = pos.y;
-        z = pos.z;
-        confidence = _confidence;
+        Position = pos;
+        X = pos.x;
+        Y = pos.y;
+        Z = pos.z;
+        Confidence = confidence;
     }
 }
 
 public class PointCloudLogger : MonoBehaviour
 {
-    public CubeBehaviour cube;
+    [FormerlySerializedAs("cube")]
+     public CubeBehaviour Cube;
 
-
-    public ARPointCloudManager pointManager;
+    [FormerlySerializedAs("pointManager")]
+    public ARPointCloudManager PointManager;
 
     public List<Point> Points = new List<Point>();
 
-    private bool scan = false;
+    bool isScanning;
 
-    public Slider slider;
+    [FormerlySerializedAs("slider")]
+    public Slider Slider;
 
     public void StartScan()
     {
-        scan = true;
-        cube.gameObject.transform.position = new Vector3(1, 1, 1);
+        isScanning = true;
+        Cube.transform.position = new Vector3(1, 1, 1);
     }
 
     void Start()
@@ -53,8 +56,8 @@ public class PointCloudLogger : MonoBehaviour
 
     IEnumerator BindCallback()
     {
-        yield return new WaitForSeconds(2);
-        pointManager.pointCloudsChanged += PointCloudsChanged;
+        yield return new WaitForSeconds(2); //odd, consider LateStart?
+        PointManager.pointCloudsChanged += PointCloudsChanged;
     }
 
     public void PointCloudsChanged(ARPointCloudChangedEventArgs obj)

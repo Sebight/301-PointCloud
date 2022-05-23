@@ -78,12 +78,22 @@ public class Collisions : MonoBehaviour
 
     void Start()
     {
+        //REFACTOR: same comments as in MyCollisions.cs
+
         //Register colliders
-        RegisterCollider("cubic-1", new BetterPhysics.CubicCollider(exampleOrigin, exampleSize, rotateBy, "cubic-1"));
-        RegisterCollider("spherical-1", new BetterPhysics.SphericalCollider(new Vector3(100, 0, 0), 5f, "spherical-1"));
+        RegisterCollider(new BetterPhysics.CubicCollider(exampleOrigin, exampleSize, rotateBy, "cubic-1"));
+        RegisterCollider(new BetterPhysics.SphericalCollider(new Vector3(100, 0, 0), 5f, "spherical-1"));
+
+        //Why is this depracated? What is the reason?
 
         //Prepare the worker threads => run CheckPointsCollisionAsnyc once.
-        CheckPointsCollisionAsync(pointsManager.Points, new List<BetterPhysics.Collider>() { Colliders["cubic-1"], Colliders["spherical-1"] }, (b) => { });
+        List<BetterPhysics.Collider> colliders = new() 
+        {
+            Colliders["cubic-1"], 
+            Colliders["spherical-1"] 
+        };
+
+        CheckPointsCollisionAsync(pointsManager.Points, colliders,  (b) => { });
     }
 
     /// <summary>
@@ -92,10 +102,15 @@ public class Collisions : MonoBehaviour
     /// <param name="id">Unique indetification of newly created collider.</param>
     /// <param name="collider">Collider object</param>
     /// <returns>Newly created collider.</returns>
-    public BetterPhysics.Collider RegisterCollider(string id, BetterPhysics.Collider collider)
+    public BetterPhysics.Collider RegisterCollider(BetterPhysics.Collider collider)
     {
-        Colliders.Add(id, collider);
+        Colliders.Add(collider.Id, collider);
         return collider;
+    }
+    public void RegisterCollider(params BetterPhysics.Collider[] colliders)
+    {
+        foreach (var x in colliders)
+            RegisterCollider(x);
     }
 
     /// <summary>
@@ -113,7 +128,7 @@ public class Collisions : MonoBehaviour
         {
             if (j >= points.Count - 1) break;
 
-            tempPoints.Add(points[j].position);
+            tempPoints.Add(points[j].Position);
         }
 
         return tempPoints;
@@ -141,7 +156,7 @@ public class Collisions : MonoBehaviour
             if (collider.GetType() == typeof(BetterPhysics.SphericalCollider))
             {
                 BetterPhysics.SphericalCollider sphere = (BetterPhysics.SphericalCollider)collider;
-                if (physics.IsPointInVolume(points[i].position, sphere.Origin, sphere.Radius))
+                if (physics.IsPointInVolume(points[i].Position, sphere.Origin, sphere.Radius))
                 {
                     inVolume = true;
                     break;
@@ -150,7 +165,7 @@ public class Collisions : MonoBehaviour
             else if (collider.GetType() == typeof(BetterPhysics.CubicCollider))
             {
                 BetterPhysics.CubicCollider cube = (BetterPhysics.CubicCollider)collider;
-                if (physics.IsPointInVolume(points[i].position, cube.Size, cube.Rotation, exampleOrigin))
+                if (physics.IsPointInVolume(points[i].Position, cube.Size, cube.Rotation, exampleOrigin))
                 {
                     inVolume = true;
                     break;

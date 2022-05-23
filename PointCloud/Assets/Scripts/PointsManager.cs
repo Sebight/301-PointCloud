@@ -22,7 +22,7 @@ public class PointsManager : MonoBehaviour
         
         for (int i = 0; i < Points.Count; i++)
         {
-            Points[i].position = new Vector3(points[i].x, points[i].y, points[i].z);
+            Points[i].Position = new Vector3(points[i].X, points[i].Y, points[i].Z);
         }
 
         //! Testing and benchmarks
