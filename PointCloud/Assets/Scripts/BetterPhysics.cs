@@ -72,6 +72,8 @@ namespace BP
         /// <returns>Boolean of if point is or is not in constructed volume.</returns>
         public static bool IsPointInVolume(Vector3 point, Vector3 volumeDimensions, Vector3 rotation, Vector3 volumeCenter)
         {
+            if (volumeDimensions == Vector3.zero) return false;
+            
             // Calculate the original direction
             Vector3 originalDirection = point - volumeCenter;
 
@@ -114,6 +116,8 @@ namespace BP
         /// <returns>Boolean of whether point is within volume or not.</returns>
         public static bool IsPointInVolume(Vector3 point, Vector3 volumeCenter, float radius)
         {
+            if (radius == 0.0f) return false;
+            
             float centerToPointDistance = Vector3.Distance(point, volumeCenter);
             return (centerToPointDistance <= radius);
         }

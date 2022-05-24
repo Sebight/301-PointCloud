@@ -100,6 +100,8 @@ public class Collisions : MonoBehaviour
     /// <returns>Newly created collider.</returns>
     public void RegisterCollider(PointCollider collider)
     {
+        if (string.IsNullOrEmpty(collider.Id)) return;
+        
         Colliders.Add(collider.Id, collider);
     }
     public void RegisterCollider(params PointCollider[] colliders)
@@ -388,6 +390,8 @@ public class Collisions : MonoBehaviour
     /// <param name="colliderData">Collider object which contains data we want to set.</param>
     public void UpdateColliderData(string id, PointCollider colliderData)
     {
+        if (string.IsNullOrEmpty(id)) throw new ArgumentNullException("id");
+        
         PointCollider col;
         bool hasCollider = Colliders.TryGetValue(id, out col);
         if (hasCollider)
